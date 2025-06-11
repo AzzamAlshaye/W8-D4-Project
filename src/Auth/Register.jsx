@@ -2,8 +2,9 @@
 import React from "react";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import { useNavigate } from "react-router";
-import axiosInstance from "../../api/axiosConfig";
+import { primaryAPI } from "../api/axiosConfig";
 import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 export default function RegisterPage() {
   const navigate = useNavigate();
@@ -29,8 +30,8 @@ export default function RegisterPage() {
       errors.email = "Required";
     } else if (!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(values.email)) {
       errors.email = "Invalid email address";
-    } else if (!values.email.includes("Tuwaiq")) {
-      errors.email = 'Email must contain the word "Tuwaiq" (for student).';
+    } else if (!values.email.endsWith("@tuwaiq.edu.sa")) {
+      errors.email = 'Email must end with "@tuwaiq.edu.sa".';
     }
 
     if (!values.password) {
@@ -57,7 +58,8 @@ export default function RegisterPage() {
     };
 
     try {
-      await axiosInstance.post("/auth/register", payload);
+      // Using primaryAPI for mock registration
+      await primaryAPI.post("/students", payload);
       toast.success("Sign-up successful! Redirecting to login…");
       resetForm();
       setTimeout(() => navigate("/login"), 1000);
@@ -70,11 +72,11 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-900 p-6">
+    <div className="min-h-screen flex items-center justify-center bg-indigo-800 p-6">
       <ToastContainer position="top-center" />
-      <div className="bg-gray-800 shadow-lg rounded-3xl max-w-md w-full p-8">
+      <div className="bg-indigo-800 shadow-lg rounded-3xl max-w-md w-full p-8">
         <div className="flex flex-col items-center mb-6">
-          <h2 className="text-2xl font-bold text-white">
+          <h2 className="text-2xl font-bold text-neutral-100">
             Create Student Account
           </h2>
         </div>
@@ -89,7 +91,7 @@ export default function RegisterPage() {
               <div>
                 <label
                   htmlFor="fullName"
-                  className="block text-gray-300 font-medium mb-1"
+                  className="block text-neutral-100 font-medium mb-1"
                 >
                   Full Name
                 </label>
@@ -97,7 +99,7 @@ export default function RegisterPage() {
                   type="text"
                   id="fullName"
                   name="fullName"
-                  className="w-full px-4 py-2 bg-gray-700 text-white border border-gray-600 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-500"
+                  className="w-full px-4 py-2 bg-neutral-100 text-indigo-800 border border-indigo-800 rounded-lg placeholder-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-800"
                   placeholder="Your Name"
                 />
                 <ErrorMessage
@@ -110,16 +112,16 @@ export default function RegisterPage() {
               <div>
                 <label
                   htmlFor="email"
-                  className="block text-gray-300 font-medium mb-1"
+                  className="block text-neutral-100 font-medium mb-1"
                 >
-                  Email Address (must contain “Tuwaiq”)
+                  Email Address (must end with “@tuwaiq.edu.sa”)
                 </label>
                 <Field
                   type="email"
                   id="email"
                   name="email"
-                  className="w-full px-4 py-2 bg-gray-700 text-white border border-gray-600 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-500"
-                  placeholder="you@Tuwaiq-university.edu"
+                  className="w-full px-4 py-2 bg-neutral-100 text-indigo-800 border border-indigo-800 rounded-lg placeholder-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-800"
+                  placeholder="you@tuwaiq.edu.sa"
                 />
                 <ErrorMessage
                   name="email"
@@ -131,7 +133,7 @@ export default function RegisterPage() {
               <div>
                 <label
                   htmlFor="password"
-                  className="block text-gray-300 font-medium mb-1"
+                  className="block text-neutral-100 font-medium mb-1"
                 >
                   Password
                 </label>
@@ -139,7 +141,7 @@ export default function RegisterPage() {
                   type="password"
                   id="password"
                   name="password"
-                  className="w-full px-4 py-2 bg-gray-700 text-white border border-gray-600 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-500"
+                  className="w-full px-4 py-2 bg-neutral-100 text-indigo-800 border border-indigo-800 rounded-lg placeholder-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-800"
                   placeholder="********"
                 />
                 <ErrorMessage
@@ -152,7 +154,7 @@ export default function RegisterPage() {
               <div>
                 <label
                   htmlFor="confirmPassword"
-                  className="block text-gray-300 font-medium mb-1"
+                  className="block text-neutral-100 font-medium mb-1"
                 >
                   Confirm Password
                 </label>
@@ -160,7 +162,7 @@ export default function RegisterPage() {
                   type="password"
                   id="confirmPassword"
                   name="confirmPassword"
-                  className="w-full px-4 py-2 bg-gray-700 text-white border border-gray-600 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-500"
+                  className="w-full px-4 py-2 bg-neutral-100 text-indigo-800 border border-indigo-800 rounded-lg placeholder-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-800"
                   placeholder="Re-enter Password"
                 />
                 <ErrorMessage
@@ -173,16 +175,16 @@ export default function RegisterPage() {
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="w-full py-2 bg-red-600 text-white font-semibold rounded-lg hover:bg-red-700 transition disabled:opacity-50"
+                className="w-full py-2 bg-indigo-800 text-neutral-100 font-semibold rounded-lg hover:bg-indigo-900 transition disabled:opacity-50"
               >
                 {isSubmitting ? "Registering..." : "Register"}
               </button>
 
-              <p className="mt-6 text-center text-gray-300">
+              <p className="mt-6 text-center text-neutral-100">
                 Already have an account?{" "}
                 <a
                   href="/login"
-                  className="text-red-500 font-medium hover:underline"
+                  className="text-indigo-300 font-medium hover:underline"
                 >
                   Log In
                 </a>

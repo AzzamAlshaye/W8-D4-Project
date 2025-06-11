@@ -1,6 +1,6 @@
 // src/router/Router.jsx
 import React from "react";
-import { createBrowserRouter, RouterProvider, Outlet } from "react-router"; // (or "react-router-dom" if that's what your version uses)
+import { createBrowserRouter, RouterProvider, Outlet } from "react-router";
 
 import { AuthProvider } from "../contexts/AuthContext";
 import ProtectedRoute from "../components/ProtectedRoute";
@@ -34,62 +34,58 @@ function RootLayout() {
 }
 
 const router = createBrowserRouter([
-  // ────────────────────────── Public Routes ──────────────────────────
+  // Public Routes
   {
     path: "/",
-    element: <RootLayout />,
+    element: (
+      <AuthProvider>
+        <RootLayout />
+      </AuthProvider>
+    ),
     children: [
       { index: true, element: <HomePage /> },
       { path: "login", element: <LoginPage /> },
       { path: "register", element: <Register /> },
-    ],
-  },
 
-  // ───────────────────── Protected: Admin (userType === "admin") ─────────────────────
-  {
-    path: "admin",
-    // Wrap all /admin/* routes in ProtectedRoute (role = "admin")
-    element: <ProtectedRoute requiredRole="admin" />,
-    children: [
-      { index: true, element: <AdminDashboard /> },
-      { path: "students", element: <ManageStudents /> },
-      { path: "teachers", element: <ManageTeachers /> },
-      { path: "ideas", element: <ManageIdeas /> },
-      { path: "assign", element: <AssignStudent /> },
-    ],
-  },
+      // Admin Routes
+      {
+        path: "admin",
+        element: <ProtectedRoute requiredRole="admin" />,
+        children: [
+          { index: true, element: <AdminDashboard /> },
+          { path: "students", element: <ManageStudents /> },
+          { path: "teachers", element: <ManageTeachers /> },
+          { path: "ideas", element: <ManageIdeas /> },
+          { path: "assign", element: <AssignStudent /> },
+        ],
+      },
 
-  // ───────────────────── Protected: Teacher (userType === "teacher") ─────────────────────
-  {
-    path: "teacher",
-    element: <ProtectedRoute requiredRole="teacher" />,
-    children: [
-      { index: true, element: <TeacherDashboard /> },
-      { path: "ideas", element: <ReviewIdeas /> },
-    ],
-  },
+      // Teacher Routes
+      {
+        path: "teacher",
+        element: <ProtectedRoute requiredRole="teacher" />,
+        children: [
+          { index: true, element: <TeacherDashboard /> },
+          { path: "ideas", element: <ReviewIdeas /> },
+        ],
+      },
 
-  // ───────────────────── Protected: Student (userType === "student") ─────────────────────
-  {
-    path: "student",
-    element: <ProtectedRoute requiredRole="student" />,
-    children: [
-      { index: true, element: <StudentDashboard /> },
-      { path: "submit", element: <SubmitIdea /> },
-    ],
-  },
+      // Student Routes
+      {
+        path: "student",
+        element: <ProtectedRoute requiredRole="student" />,
+        children: [
+          { index: true, element: <StudentDashboard /> },
+          { path: "submit", element: <SubmitIdea /> },
+        ],
+      },
 
-  // ───────────────────────────── Catch-All (404) ────────────────────────────
-  {
-    path: "*",
-    element: <NotFound />,
+      // Catch-all
+      { path: "*", element: <NotFound /> },
+    ],
   },
 ]);
 
 export default function AppRouter() {
-  return (
-    <AuthProvider>
-      <RouterProvider router={router} />
-    </AuthProvider>
-  );
+  return <RouterProvider router={router} />;
 }

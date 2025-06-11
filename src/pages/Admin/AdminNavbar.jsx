@@ -1,6 +1,6 @@
 // src/pages/Admin/AdminNavbar.jsx
 import React from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation } from "react-router";
 
 export default function AdminNavbar() {
   const location = useLocation();

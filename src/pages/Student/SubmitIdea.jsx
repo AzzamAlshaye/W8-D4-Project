@@ -1,7 +1,7 @@
 // src/pages/Student/SubmitIdea.jsx
 import React, { useEffect, useState } from "react";
 import { useAuth } from "../../contexts/AuthContext";
-import axiosInstance from "../../api/axiosConfig";
+import { primaryAPI } from "../../api/axiosConfig";
 import Navbar from "../../components/Navbar";
 import { toast } from "react-toastify";
 
@@ -16,7 +16,7 @@ export default function SubmitIdea() {
 
   const fetchMyIdeas = async () => {
     try {
-      const res = await axiosInstance.get(`/ideas?studentId=${user.userId}`);
+      const res = await primaryAPI.get(`/ideas?studentId=${user.userId}`);
       setMyIdeas(res.data);
     } catch (err) {
       console.error(err);
@@ -32,8 +32,9 @@ export default function SubmitIdea() {
     }
 
     try {
-      await axiosInstance.post("/ideas", {
-        ...newIdea,
+      await primaryAPI.post("/ideas", {
+        title: newIdea.title,
+        description: newIdea.description,
         studentId: user.userId,
         studentName: user.fullName,
         status: "pending",
@@ -49,84 +50,73 @@ export default function SubmitIdea() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div className="min-h-screen bg-indigo-800 text-neutral-100 p-6">
       <Navbar />
-
-      <div className="p-6 space-y-6">
+      <div className="max-w-4xl mx-auto space-y-6">
         <h1 className="text-2xl font-bold">Submit a New Project Idea</h1>
 
-        {/* Submission Form */}
         <form
           onSubmit={handleSubmit}
-          className="bg-white rounded-lg shadow p-6 space-y-4 max-w-lg"
+          className="bg-neutral-100 text-indigo-800 rounded-2xl shadow p-6 space-y-4"
         >
           <div>
-            <label className="block text-gray-700 mb-1">Title:</label>
+            <label className="block font-medium mb-1">Title:</label>
             <input
               type="text"
               value={newIdea.title}
               onChange={(e) =>
                 setNewIdea({ ...newIdea, title: e.target.value })
               }
-              className="w-full border rounded px-3 py-2 bg-gray-50"
+              className="w-full border border-indigo-800 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-800"
               placeholder="Enter idea title"
             />
           </div>
           <div>
-            <label className="block text-gray-700 mb-1">Description:</label>
+            <label className="block font-medium mb-1">Description:</label>
             <textarea
               rows="4"
               value={newIdea.description}
               onChange={(e) =>
                 setNewIdea({ ...newIdea, description: e.target.value })
               }
-              className="w-full border rounded px-3 py-2 bg-gray-50"
+              className="w-full border border-indigo-800 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-800"
               placeholder="Describe your project idea..."
-            ></textarea>
+            />
           </div>
           <button
             type="submit"
-            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+            className="bg-neutral-100 text-indigo-800 font-semibold rounded-lg px-6 py-2 hover:bg-neutral-200 transition"
           >
             Submit Idea
           </button>
         </form>
 
-        {/* My Past Ideas */}
         <div>
-          <h2 className="text-xl font-medium mb-2">My Project Ideas</h2>
+          <h2 className="text-xl font-medium mb-2 text-neutral-100">
+            My Project Ideas
+          </h2>
           {myIdeas.length === 0 ? (
-            <p className="text-gray-600">
+            <p className="text-neutral-300">
               You have not submitted any ideas yet.
             </p>
           ) : (
             <div className="overflow-x-auto">
-              <table className="min-w-full bg-white rounded-lg overflow-hidden shadow">
-                <thead className="bg-gray-800 text-white">
+              <table className="min-w-full bg-neutral-100 rounded-lg overflow-hidden shadow">
+                <thead className="bg-indigo-800 text-neutral-100">
                   <tr>
                     <th className="px-6 py-3">Title</th>
                     <th className="px-6 py-3">Status</th>
-                    <th className="px-6 py-3">Reason (if rejected)</th>
+                    <th className="px-6 py-3">Reason</th>
                   </tr>
                 </thead>
                 <tbody>
                   {myIdeas.map((idea) => (
-                    <tr key={idea.id} className="hover:bg-gray-100">
+                    <tr key={idea.id} className="hover:bg-neutral-200">
                       <td className="px-6 py-4">{idea.title}</td>
                       <td className="px-6 py-4 capitalize">{idea.status}</td>
                       <td className="px-6 py-4">{idea.reason || "—"}</td>
                     </tr>
                   ))}
-                  {myIdeas.length === 0 && (
-                    <tr>
-                      <td
-                        colSpan="3"
-                        className="text-center py-4 text-gray-500"
-                      >
-                        No ideas to display.
-                      </td>
-                    </tr>
-                  )}
                 </tbody>
               </table>
             </div>

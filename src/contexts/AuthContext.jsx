@@ -1,6 +1,6 @@
 // src/contexts/AuthContext.jsx
-import React, { createContext, useContext, useEffect, useState } from "react";
-import axiosInstance from "../api/axiosConfig";
+import React, { createContext, useContext, useState } from "react";
+import { primaryAPI } from "../api/axiosConfig";
 import { useNavigate } from "react-router";
 import { toast } from "react-toastify";
 
@@ -15,33 +15,45 @@ export function AuthProvider({ children }) {
 
   const isAuthenticated = Boolean(user);
 
-  // Login function: call backend /auth/login
+  // Login: fetch user record by email from MockAPI and validate password client-side
   const login = async (email, password) => {
     try {
-      const resp = await axiosInstance.post("/auth/login", { email, password });
-      // Expected response: { token, userId, email, fullName, userType }
-      const { token, userId, fullName, userType, email: userEmail } = resp.data;
+      const resp = await primaryAPI.get("/auth", { params: { email } });
+      const users = resp.data;
+      if (users.length === 0) {
+        toast.error("No account found with that email.");
+        return;
+      }
+      const userData = users[0];
+      if (userData.password !== password) {
+        toast.error("Incorrect password.");
+        return;
+      }
 
-      // Save in localStorage:
+      // Generate a mock token
+      const token = `mock-token-${userData.id}`;
       localStorage.setItem("token", token);
-      localStorage.setItem(
-        "user",
-        JSON.stringify({ userId, fullName, userType, email: userEmail })
-      );
+      localStorage.setItem("user", JSON.stringify(userData));
+      setUser(userData);
 
-      setUser({ userId, fullName, userType, email: userEmail });
       toast.success("Login successful!");
-      // Redirect based on userType:
-      if (userType === "admin") navigate("/admin");
-      else if (userType === "teacher") navigate("/teacher");
-      else if (userType === "student") navigate("/student");
+      // Redirect based on userType
+      if (userData.userType === "admin") {
+        navigate("/admin");
+      } else if (userData.userType === "teacher") {
+        navigate("/teacher");
+      } else if (userData.userType === "student") {
+        navigate("/student");
+      } else {
+        navigate("/");
+      }
     } catch (err) {
       console.error(err);
-      toast.error(err.response?.data?.message || "Login failed");
+      toast.error("Login failed. Please try again later.");
     }
   };
 
-  // Logout function: clear everything
+  // Logout: clear stored info and redirect to login
   const logout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
@@ -50,8 +62,6 @@ export function AuthProvider({ children }) {
     navigate("/login");
   };
 
-  // We could implement a function to register a new student here, but we'll do it in the page
-
   return (
     <AuthContext.Provider value={{ user, isAuthenticated, login, logout }}>
       {children}
@@ -59,7 +69,7 @@ export function AuthProvider({ children }) {
   );
 }
 
-// Custom hook to use auth:
+// Custom hook to access auth context
 export function useAuth() {
   return useContext(AuthContext);
 }

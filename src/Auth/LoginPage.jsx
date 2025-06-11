@@ -1,7 +1,7 @@
 // src/pages/Auth/LoginPage.jsx
 import React from "react";
 import { Formik, Form, Field, ErrorMessage } from "formik";
-import { useAuth } from "../../contexts/AuthContext";
+import { useAuth } from "../contexts/AuthContext";
 import { ToastContainer } from "react-toastify";
 
 export default function LoginPage() {

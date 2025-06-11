@@ -1,7 +1,7 @@
 // src/pages/Student/StudentDashboard.jsx
 import React, { useEffect, useState } from "react";
 import { useAuth } from "../../contexts/AuthContext";
-import axiosInstance from "../../api/axiosConfig";
+import { tertiaryAPI, primaryAPI } from "../../api/axiosConfig";
 import Navbar from "../../components/Navbar";
 
 export default function StudentDashboard() {
@@ -10,44 +10,41 @@ export default function StudentDashboard() {
   const [approvedIdeas, setApprovedIdeas] = useState([]);
 
   useEffect(() => {
+    const fetchAssignedTeacher = async () => {
+      try {
+        const res = await tertiaryAPI.get(
+          `/assignments?studentId=${user.userId}`
+        );
+        setAssignedTeacher(
+          res.data.length > 0 ? res.data[0].teacherName : null
+        );
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
+    const fetchApprovedIdeas = async () => {
+      try {
+        const res = await primaryAPI.get("/ideas?status=accepted");
+        setApprovedIdeas(res.data);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
     fetchAssignedTeacher();
     fetchApprovedIdeas();
-  }, []);
-
-  const fetchAssignedTeacher = async () => {
-    try {
-      const res = await axiosInstance.get(
-        `/assignments?studentId=${user.userId}`
-      );
-      if (res.data.length > 0) {
-        setAssignedTeacher(res.data[0].teacherName);
-      } else {
-        setAssignedTeacher(null);
-      }
-    } catch (err) {
-      console.error(err);
-    }
-  };
-
-  const fetchApprovedIdeas = async () => {
-    try {
-      const res = await axiosInstance.get("/ideas?status=accepted");
-      setApprovedIdeas(res.data);
-    } catch (err) {
-      console.error(err);
-    }
-  };
+  }, [user.userId]);
 
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div className="min-h-screen bg-indigo-800 text-neutral-100 p-6">
       <Navbar />
-
-      <div className="p-6 space-y-6">
+      <div className="max-w-4xl mx-auto space-y-6">
         <h1 className="text-2xl font-bold">Welcome, {user.fullName}</h1>
 
         <div>
           <h2 className="text-xl font-medium mb-2">Assigned Teacher:</h2>
-          <p className="text-gray-700">
+          <p className="text-neutral-300">
             {assignedTeacher || "Not assigned yet."}
           </p>
         </div>
@@ -55,11 +52,11 @@ export default function StudentDashboard() {
         <div>
           <h2 className="text-xl font-medium mb-2">Approved Project Ideas:</h2>
           {approvedIdeas.length === 0 ? (
-            <p className="text-gray-600">No approved ideas yet.</p>
+            <p className="text-neutral-300">No approved ideas yet.</p>
           ) : (
             <ul className="list-disc list-inside space-y-2">
               {approvedIdeas.map((idea) => (
-                <li key={idea.id} className="text-gray-800">
+                <li key={idea.id} className="text-neutral-100">
                   {idea.title} (by {idea.studentName})
                 </li>
               ))}
