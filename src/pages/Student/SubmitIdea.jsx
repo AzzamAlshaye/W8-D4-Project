@@ -1,7 +1,7 @@
 // src/pages/Student/SubmitIdea.jsx
 import React, { useEffect, useState } from "react";
 import { useAuth } from "../../contexts/AuthContext";
-import { primaryAPI } from "../../api/axiosConfig";
+import { primaryAPI, secondaryAPI } from "../../api/axiosConfig";
 import Navbar from "../../components/Navbar";
 import { toast } from "react-toastify";
 
@@ -16,7 +16,7 @@ export default function SubmitIdea() {
 
   const fetchMyIdeas = async () => {
     try {
-      const res = await primaryAPI.get(`/ideas?studentId=${user.userId}`);
+      const res = await secondaryAPI.get(`/ideas?studentId=${user.userId}`);
       setMyIdeas(res.data);
     } catch (err) {
       console.error(err);
@@ -32,7 +32,7 @@ export default function SubmitIdea() {
     }
 
     try {
-      await primaryAPI.post("/ideas", {
+      await secondaryAPI.post("/ideas", {
         title: newIdea.title,
         description: newIdea.description,
         studentId: user.userId,

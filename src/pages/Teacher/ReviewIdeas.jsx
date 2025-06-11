@@ -1,7 +1,7 @@
 // src/pages/Teacher/TeacherDashboard.jsx
 import React, { useEffect, useState } from "react";
 import { useAuth } from "../../contexts/AuthContext";
-import { tertiaryAPI } from "../../api/axiosConfig";
+import { secondaryAPI } from "../../api/axiosConfig";
 import Navbar from "../../components/Navbar";
 
 export default function TeacherDashboard() {
@@ -11,7 +11,7 @@ export default function TeacherDashboard() {
   useEffect(() => {
     const fetchAssignedStudents = async () => {
       try {
-        const res = await tertiaryAPI.get(
+        const res = await secondaryAPI.get(
           `/assignments?teacherId=${user.userId}`
         );
         setStudents(res.data);

@@ -1,7 +1,7 @@
 // src/pages/Student/StudentDashboard.jsx
 import React, { useEffect, useState } from "react";
 import { useAuth } from "../../contexts/AuthContext";
-import { tertiaryAPI, primaryAPI } from "../../api/axiosConfig";
+import { secondaryAPI, primaryAPI } from "../../api/axiosConfig";
 import Navbar from "../../components/Navbar";
 
 export default function StudentDashboard() {
@@ -12,7 +12,7 @@ export default function StudentDashboard() {
   useEffect(() => {
     const fetchAssignedTeacher = async () => {
       try {
-        const res = await tertiaryAPI.get(
+        const res = await secondaryAPI.get(
           `/assignments?studentId=${user.userId}`
         );
         setAssignedTeacher(
@@ -25,7 +25,7 @@ export default function StudentDashboard() {
 
     const fetchApprovedIdeas = async () => {
       try {
-        const res = await primaryAPI.get("/ideas?status=accepted");
+        const res = await secondaryAPI.get("/ideas?status=accepted");
         setApprovedIdeas(res.data);
       } catch (err) {
         console.error(err);
