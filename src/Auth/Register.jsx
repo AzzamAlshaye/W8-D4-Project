@@ -59,7 +59,7 @@ export default function RegisterPage() {
 
     try {
       // Using primaryAPI for mock registration
-      await primaryAPI.post("/students", payload);
+      await primaryAPI.post("/auth", payload);
       toast.success("Sign-up successful! Redirecting to login…");
       resetForm();
       setTimeout(() => navigate("/login"), 1000);
@@ -72,7 +72,7 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-indigo-800 p-6">
+    <div className="min-h-screen flex items-center justify-center bg-neutral-100 p-6">
       <ToastContainer position="top-center" />
       <div className="bg-indigo-800 shadow-lg rounded-3xl max-w-md w-full p-8">
         <div className="flex flex-col items-center mb-6">
@@ -175,7 +175,7 @@ export default function RegisterPage() {
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="w-full py-2 bg-indigo-800 text-neutral-100 font-semibold rounded-lg hover:bg-indigo-900 transition disabled:opacity-50"
+                className="w-full py-2 bg-neutral-100 text-indigo-800 font-semibold rounded-lg hover:bg-neutral-200 transition disabled:opacity-50"
               >
                 {isSubmitting ? "Registering..." : "Register"}
               </button>

@@ -1,7 +1,7 @@
 // src/pages/Admin/AdminDashboard.jsx
 import React, { useEffect, useState } from "react";
 import { useAuth } from "../../contexts/AuthContext";
-import { primaryAPI } from "../../api/axiosConfig"; // use primaryAPI instead of default axiosInstance
+import { primaryAPI, secondaryAPI } from "../../api/axiosConfig";
 import Navbar from "../../components/Navbar";
 import AdminNavbar from "./AdminNavbar";
 
@@ -42,8 +42,8 @@ export default function AdminDashboard() {
           await Promise.all([
             primaryAPI.get("/students"),
             primaryAPI.get("/teachers"),
-            primaryAPI.get("/ideas"),
-            primaryAPI.get("/assignments"),
+            secondaryAPI.get("/ideas"),
+            secondaryAPI.get("/assignments"),
           ]);
 
         const students = studentsRes.data;
@@ -118,7 +118,7 @@ export default function AdminDashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-neutral-100 text-indigo-800">
+    <div className="min-h-screen bg-neutral-100 text-indigo-800 p-6">
       <Navbar />
       <AdminNavbar />
       <div className="p-6 space-y-8">

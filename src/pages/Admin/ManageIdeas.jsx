@@ -1,7 +1,7 @@
 // src/pages/Admin/ManageIdeas.jsx
 import React, { useEffect, useState } from "react";
 import { useAuth } from "../../contexts/AuthContext";
-import { primaryAPI } from "../../api/axiosConfig";
+import { secondaryAPI } from "../../api/axiosConfig";
 import Navbar from "../../components/Navbar";
 import AdminNavbar from "./AdminNavbar";
 import { toast } from "react-toastify";
@@ -19,7 +19,7 @@ export default function ManageIdeas() {
 
   const fetchIdeas = async () => {
     try {
-      const res = await primaryAPI.get("/ideas");
+      const res = await secondaryAPI.get("/ideas");
       setIdeas(res.data);
     } catch (err) {
       console.error(err);
@@ -37,7 +37,7 @@ export default function ManageIdeas() {
 
   const updateIdeaStatus = async (id, newStatus, reason = "") => {
     try {
-      await primaryAPI.put(`/ideas/${id}`, { status: newStatus, reason });
+      await secondaryAPI.put(`/ideas/${id}`, { status: newStatus, reason });
       toast.success(`Idea ${newStatus}`);
       fetchIdeas();
     } catch (err) {
@@ -49,7 +49,7 @@ export default function ManageIdeas() {
   const deleteIdea = async (id) => {
     if (!window.confirm("Are you sure you want to delete this idea?")) return;
     try {
-      await primaryAPI.delete(`/ideas/${id}`);
+      await secondaryAPI.delete(`/ideas/${id}`);
       toast.success("Idea deleted");
       fetchIdeas();
     } catch (err) {
@@ -65,7 +65,7 @@ export default function ManageIdeas() {
 
   const saveEditedIdea = async () => {
     try {
-      await primaryAPI.put(`/ideas/${editingIdea.id}`, {
+      await secondaryAPI.put(`/ideas/${editingIdea.id}`, {
         title: editingIdea.title,
         description: editingIdea.description,
       });

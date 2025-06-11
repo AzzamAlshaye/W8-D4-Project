@@ -3,6 +3,7 @@ import React from "react";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import { useAuth } from "../contexts/AuthContext";
 import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 export default function LoginPage() {
   const { login } = useAuth();
@@ -25,10 +26,10 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-900 p-6">
+    <div className="min-h-screen flex items-center justify-center bg-neutral-100 p-6">
       <ToastContainer position="top-center" />
-      <div className="bg-gray-800 shadow-lg rounded-3xl max-w-md w-full p-8">
-        <h2 className="text-3xl font-bold text-white mb-6 text-center">
+      <div className="bg-indigo-800 shadow-lg rounded-3xl max-w-md w-full p-8">
+        <h2 className="text-3xl font-bold text-neutral-100 mb-6 text-center">
           Log In
         </h2>
         <Formik
@@ -41,7 +42,7 @@ export default function LoginPage() {
               <div>
                 <label
                   htmlFor="email"
-                  className="block text-gray-300 font-medium mb-1"
+                  className="block text-neutral-100 font-medium mb-1"
                 >
                   Email Address
                 </label>
@@ -49,7 +50,7 @@ export default function LoginPage() {
                   type="email"
                   id="email"
                   name="email"
-                  className="w-full px-4 py-2 bg-gray-700 text-white border border-gray-600 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-500"
+                  className="w-full px-4 py-2 bg-neutral-100 text-indigo-800 border border-indigo-800 rounded-lg placeholder-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-800"
                   placeholder="you@domain.com"
                 />
                 <ErrorMessage
@@ -62,7 +63,7 @@ export default function LoginPage() {
               <div>
                 <label
                   htmlFor="password"
-                  className="block text-gray-300 font-medium mb-1"
+                  className="block text-neutral-100 font-medium mb-1"
                 >
                   Password
                 </label>
@@ -70,7 +71,7 @@ export default function LoginPage() {
                   type="password"
                   id="password"
                   name="password"
-                  className="w-full px-4 py-2 bg-gray-700 text-white border border-gray-600 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-500"
+                  className="w-full px-4 py-2 bg-neutral-100 text-indigo-800 border border-indigo-800 rounded-lg placeholder-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-800"
                   placeholder="********"
                 />
                 <ErrorMessage
@@ -83,15 +84,16 @@ export default function LoginPage() {
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="w-full py-2 bg-red-600 text-white font-semibold rounded-lg hover:bg-red-700 transition disabled:opacity-50"
+                className="w-full py-2 bg-neutral-100 text-indigo-800 font-semibold rounded-lg hover:bg-neutral-200 transition disabled:opacity-50"
               >
                 {isSubmitting ? "Logging In..." : "Log In"}
               </button>
-              <p className="text-gray-300 text-center">
+
+              <p className="text-neutral-100 text-center">
                 Don’t have an account?{" "}
                 <a
                   href="/register"
-                  className="text-red-500 hover:underline font-medium"
+                  className="text-indigo-300 hover:underline font-medium"
                 >
                   Register
                 </a>
