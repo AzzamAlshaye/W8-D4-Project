@@ -23,8 +23,11 @@ export default function ManageStudents() {
 
   const fetchStudents = async () => {
     try {
-      const res = await primaryAPI.get("/students");
-      setStudents(res.data);
+      // GET all users, then filter to only students
+      const res = await primaryAPI.get("/auth");
+      const allUsers = res.data;
+      const studentsOnly = allUsers.filter((u) => u.userType === "student");
+      setStudents(studentsOnly);
     } catch (err) {
       console.error(err);
       toast.error("Failed to fetch students");
@@ -41,7 +44,7 @@ export default function ManageStudents() {
     if (!window.confirm("Are you sure you want to delete this student?"))
       return;
     try {
-      await primaryAPI.delete(`/students/${id}`);
+      await primaryAPI.delete(`/auth/${id}`);
       toast.success("Student deleted");
       fetchStudents();
     } catch (err) {
@@ -65,8 +68,11 @@ export default function ManageStudents() {
     }
     try {
       setAdding(true);
-      await primaryAPI.post("/students", {
-        ...newStudent,
+      // POST to /auth, marking this new user as a student
+      await primaryAPI.post("/auth", {
+        fullName: newStudent.fullName,
+        email: newStudent.email,
+        password: newStudent.password,
         userType: "student",
       });
       toast.success("New student added");
