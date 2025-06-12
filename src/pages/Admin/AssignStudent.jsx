@@ -1,81 +1,70 @@
-// src/pages/Admin/ManageIdeas.jsx
+// src/pages/Admin/AssignStudent.jsx
 import React, { useEffect, useState } from "react";
 import { useAuth } from "../../contexts/AuthContext";
-import { secondaryAPI } from "../../api/axiosConfig";
+import { primaryAPI, secondaryAPI } from "../../api/axiosConfig";
 import Navbar from "../../components/Navbar";
 import AdminNavbar from "./AdminNavbar";
 import { toast } from "react-toastify";
 
-export default function ManageIdeas() {
+export default function AssignStudent() {
   const { user } = useAuth();
-  const [ideas, setIdeas] = useState([]);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [editingIdea, setEditingIdea] = useState(null);
-  const [showModal, setShowModal] = useState(false);
+  const [students, setStudents] = useState([]);
+  const [teachers, setTeachers] = useState([]);
+  const [selectedStudentId, setSelectedStudentId] = useState("");
+  const [selectedTeacherId, setSelectedTeacherId] = useState("");
 
   useEffect(() => {
-    fetchIdeas();
+    fetchStudents();
+    fetchTeachers();
   }, []);
 
-  const fetchIdeas = async () => {
+  const fetchStudents = async () => {
     try {
-      const res = await secondaryAPI.get("/ideas");
-      setIdeas(res.data);
-    } catch (err) {
-      console.error(err);
-      toast.error("Failed to fetch ideas");
-    }
-  };
-
-  const handleSearch = (e) => setSearchTerm(e.target.value);
-
-  const filteredIdeas = ideas.filter(
-    (idea) =>
-      idea.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      idea.studentName.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
-  const updateIdeaStatus = async (id, newStatus, reason = "") => {
-    try {
-      await secondaryAPI.put(`/ideas/${id}`, { status: newStatus, reason });
-      toast.success(`Idea ${newStatus}`);
-      fetchIdeas();
-    } catch (err) {
-      console.error(err);
-      toast.error("Failed to update idea");
-    }
-  };
-
-  const deleteIdea = async (id) => {
-    if (!window.confirm("Are you sure you want to delete this idea?")) return;
-    try {
-      await secondaryAPI.delete(`/ideas/${id}`);
-      toast.success("Idea deleted");
-      fetchIdeas();
-    } catch (err) {
-      console.error(err);
-      toast.error("Failed to delete idea");
-    }
-  };
-
-  const openEditModal = (idea) => {
-    setEditingIdea({ ...idea });
-    setShowModal(true);
-  };
-
-  const saveEditedIdea = async () => {
-    try {
-      await secondaryAPI.put(`/ideas/${editingIdea.id}`, {
-        title: editingIdea.title,
-        description: editingIdea.description,
+      const res = await primaryAPI.get("/auth", {
+        params: { userType: "student" },
       });
-      toast.success("Idea updated");
-      setShowModal(false);
-      setEditingIdea(null);
-      fetchIdeas();
+      setStudents(res.data);
     } catch (err) {
       console.error(err);
-      toast.error("Failed to update idea");
+      toast.error("Failed to fetch students");
+    }
+  };
+
+  const fetchTeachers = async () => {
+    try {
+      const res = await primaryAPI.get("/auth", {
+        params: { userType: "teacher" },
+      });
+      setTeachers(res.data);
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to fetch teachers");
+    }
+  };
+
+  const handleAssign = async (e) => {
+    e.preventDefault();
+    if (!selectedStudentId || !selectedTeacherId) {
+      toast.error("Please select both a student and a teacher");
+      return;
+    }
+    try {
+      const student = students.find((s) => s.id === selectedStudentId);
+      const teacher = teachers.find((t) => t.id === selectedTeacherId);
+
+      await secondaryAPI.post("/assignments", {
+        studentId: selectedStudentId,
+        studentName: student.fullName,
+        teacherId: selectedTeacherId,
+        teacherName: teacher.fullName,
+      });
+
+      toast.success("Assigned successfully");
+      setSelectedStudentId("");
+      setSelectedTeacherId("");
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to assign");
     }
   };
 
@@ -84,129 +73,57 @@ export default function ManageIdeas() {
       <Navbar />
       <AdminNavbar />
 
-      <div className="max-w-5xl mx-auto space-y-6">
-        <h1 className="text-2xl font-bold">Manage Project Ideas</h1>
+      <div className="max-w-lg mx-auto space-y-6">
+        <h1 className="text-2xl font-bold">Assign Student to Teacher</h1>
 
-        <input
-          type="text"
-          placeholder="Search by title or student..."
-          value={searchTerm}
-          onChange={handleSearch}
-          className="w-full md:w-1/3 px-3 py-2 bg-neutral-100 text-indigo-800 border border-indigo-800 rounded-lg focus:ring-2 focus:ring-indigo-800"
-        />
-
-        <div className="overflow-x-auto">
-          <table className="min-w-full bg-neutral-100 rounded-lg overflow-hidden shadow">
-            <thead className="bg-indigo-800 text-neutral-100">
-              <tr>
-                <th className="px-6 py-3">Title</th>
-                <th className="px-6 py-3">Student</th>
-                <th className="px-6 py-3">Status</th>
-                <th className="px-6 py-3">Reason</th>
-                <th className="px-6 py-3">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredIdeas.map((idea) => (
-                <tr key={idea.id} className="hover:bg-neutral-200">
-                  <td className="px-6 py-4">{idea.title}</td>
-                  <td className="px-6 py-4">{idea.studentName}</td>
-                  <td className="px-6 py-4 capitalize">{idea.status}</td>
-                  <td className="px-6 py-4">{idea.reason || "—"}</td>
-                  <td className="px-6 py-4 space-x-2">
-                    {idea.status === "pending" && (
-                      <>
-                        <button
-                          onClick={() => updateIdeaStatus(idea.id, "accepted")}
-                          className="bg-indigo-800 text-neutral-100 px-3 py-1 rounded hover:bg-indigo-900"
-                        >
-                          Accept
-                        </button>
-                        <button
-                          onClick={() => {
-                            const reason = prompt("Reason for rejection:");
-                            if (reason !== null) {
-                              updateIdeaStatus(idea.id, "rejected", reason);
-                            }
-                          }}
-                          className="bg-red-600 text-neutral-100 px-3 py-1 rounded hover:bg-red-700"
-                        >
-                          Reject
-                        </button>
-                      </>
-                    )}
-                    <button
-                      onClick={() => openEditModal(idea)}
-                      className="bg-yellow-500 text-neutral-100 px-3 py-1 rounded hover:bg-yellow-600"
-                    >
-                      Edit
-                    </button>
-                    <button
-                      onClick={() => deleteIdea(idea.id)}
-                      className="bg-indigo-800 text-neutral-100 px-3 py-1 rounded hover:bg-indigo-900"
-                    >
-                      Delete
-                    </button>
-                  </td>
-                </tr>
-              ))}
-              {filteredIdeas.length === 0 && (
-                <tr>
-                  <td colSpan="5" className="text-center py-4 text-indigo-800">
-                    No ideas found.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-
-        {/* Edit Modal */}
-        {showModal && editingIdea && (
-          <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-            <div className="bg-neutral-100 text-indigo-800 rounded-lg w-full max-w-lg p-6 space-y-4">
-              <h2 className="text-xl font-bold">Edit Idea</h2>
-              <label className="block">
-                <span className="font-medium">Title:</span>
-                <input
-                  type="text"
-                  value={editingIdea.title}
-                  onChange={(e) =>
-                    setEditingIdea({ ...editingIdea, title: e.target.value })
-                  }
-                  className="mt-1 block w-full border border-indigo-800 rounded-lg p-2 focus:ring-2 focus:ring-indigo-800"
-                />
-              </label>
-              <label className="block">
-                <span className="font-medium">Description:</span>
-                <textarea
-                  rows="4"
-                  value={editingIdea.description}
-                  onChange={(e) =>
-                    setEditingIdea({
-                      ...editingIdea,
-                      description: e.target.value,
-                    })
-                  }
-                  className="mt-1 block w-full border border-indigo-800 rounded-lg p-2 focus:ring-2 focus:ring-indigo-800"
-                />
-              </label>
-              <div className="flex justify-end space-x-3">
-                <button
-                  onClick={() => setShowModal(false) && setEditingIdea(null)}
-                  className="px-4 py-2 bg-indigo-800 text-neutral-100 rounded-lg hover:bg-indigo-900"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={saveEditedIdea}
-                  className="px-4 py-2 bg-indigo-800 text-neutral-100 rounded-lg hover:bg-indigo-900"
-                >
-                  Save
-                </button>
-              </div>
+        {user.userType === "admin" ? (
+          <form
+            onSubmit={handleAssign}
+            className="bg-indigo-800 text-neutral-100 p-6 rounded-2xl shadow space-y-4"
+          >
+            <div>
+              <label className="block mb-1">Select Student:</label>
+              <select
+                value={selectedStudentId}
+                onChange={(e) => setSelectedStudentId(e.target.value)}
+                className="w-full px-3 py-2 bg-neutral-100 text-indigo-800 border border-indigo-800 rounded-lg focus:ring-2 focus:ring-indigo-800"
+              >
+                <option value="">-- Choose a Student --</option>
+                {students.map((s) => (
+                  <option key={s.id} value={s.id}>
+                    {s.fullName}
+                  </option>
+                ))}
+              </select>
             </div>
-          </div>
+
+            <div>
+              <label className="block mb-1">Select Teacher:</label>
+              <select
+                value={selectedTeacherId}
+                onChange={(e) => setSelectedTeacherId(e.target.value)}
+                className="w-full px-3 py-2 bg-neutral-100 text-indigo-800 border border-indigo-800 rounded-lg focus:ring-2 focus:ring-indigo-800"
+              >
+                <option value="">-- Choose a Teacher --</option>
+                {teachers.map((t) => (
+                  <option key={t.id} value={t.id}>
+                    {t.fullName}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <button
+              type="submit"
+              className="w-full py-2 bg-neutral-100 text-indigo-800 font-semibold rounded-lg hover:bg-neutral-200 transition"
+            >
+              Assign
+            </button>
+          </form>
+        ) : (
+          <p className="text-center text-indigo-800">
+            Only admins can assign students.
+          </p>
         )}
       </div>
     </div>
