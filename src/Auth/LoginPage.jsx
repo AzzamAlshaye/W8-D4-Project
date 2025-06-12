@@ -51,7 +51,7 @@ export default function LoginPage() {
                   id="email"
                   name="email"
                   className="w-full px-4 py-2 bg-neutral-100 text-indigo-800 border border-indigo-800 rounded-lg placeholder-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-800"
-                  placeholder="you@domain.com"
+                  placeholder="you@tuwaiq.edu.sa"
                 />
                 <ErrorMessage
                   name="email"

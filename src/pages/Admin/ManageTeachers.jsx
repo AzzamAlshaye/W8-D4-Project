@@ -3,8 +3,8 @@ import React, { useEffect, useState } from "react";
 import { useAuth } from "../../contexts/AuthContext";
 import { primaryAPI } from "../../api/axiosConfig";
 import Navbar from "../../components/Navbar";
-
-import { toast } from "react-toastify";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 export default function ManageTeachers() {
   const { user } = useAuth();
@@ -17,13 +17,16 @@ export default function ManageTeachers() {
   });
   const [adding, setAdding] = useState(false);
 
+  // Edit state
+  const [editingTeacher, setEditingTeacher] = useState(null);
+  // { id, fullName, email, password }
+
   useEffect(() => {
     fetchTeachers();
   }, []);
 
-  const fetchTeachers = async () => {
+  async function fetchTeachers() {
     try {
-      // Fetch all users, then keep only those with userType "teacher"
       const res = await primaryAPI.get("/auth");
       const allUsers = res.data;
       const teachersOnly = allUsers.filter((u) => u.userType === "teacher");
@@ -32,15 +35,9 @@ export default function ManageTeachers() {
       console.error(err);
       toast.error("Failed to fetch teachers");
     }
-  };
+  }
 
-  const handleSearch = (e) => setSearchTerm(e.target.value);
-
-  const filteredTeachers = teachers.filter((t) =>
-    t.fullName.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
-  const handleDelete = async (id) => {
+  async function handleDelete(id) {
     if (!window.confirm("Are you sure you want to delete this teacher?"))
       return;
     try {
@@ -51,21 +48,21 @@ export default function ManageTeachers() {
       console.error(err);
       toast.error("Failed to delete teacher");
     }
-  };
+  }
 
-  const handleAddTeacher = async (e) => {
+  async function handleAddTeacher(e) {
     e.preventDefault();
     const { fullName, email, password } = newTeacher;
-    if (!fullName || !email || !password) {
+    if (!fullName.trim() || !email.trim() || !password.trim()) {
       toast.error("All fields are required");
       return;
     }
     try {
       setAdding(true);
       await primaryAPI.post("/auth", {
-        fullName,
-        email,
-        password,
+        fullName: fullName.trim(),
+        email: email.trim(),
+        password: password.trim(),
         userType: "teacher",
       });
       toast.success("New teacher added");
@@ -77,22 +74,58 @@ export default function ManageTeachers() {
     } finally {
       setAdding(false);
     }
-  };
+  }
+
+  function startEdit(t) {
+    setEditingTeacher({
+      id: t.id,
+      fullName: t.fullName,
+      email: t.email,
+      password: "",
+    });
+  }
+
+  async function saveEdit() {
+    const { id, fullName, email, password } = editingTeacher;
+    if (!fullName.trim() || !email.trim()) {
+      toast.error("Name and email are required");
+      return;
+    }
+    try {
+      await primaryAPI.put(`/auth/${id}`, {
+        fullName: fullName.trim(),
+        email: email.trim(),
+        ...(password.trim() && { password: password.trim() }),
+        userType: "teacher",
+      });
+      toast.success("Teacher updated");
+      setEditingTeacher(null);
+      fetchTeachers();
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to update teacher");
+    }
+  }
+
+  const filtered = teachers.filter((t) =>
+    t.fullName.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   return (
-    <div className="min-h-screen bg-neutral-100 text-indigo-800 p-6">
+    <div className="min-h-screen bg-neutral-100 text-indigo-800 p-4 sm:p-6 lg:p-8">
+      <ToastContainer position="top-center" />
       <Navbar />
 
-      <div className="max-w-4xl mx-auto space-y-6">
-        <h1 className="text-2xl font-bold">Manage Teachers</h1>
+      <div className="max-w-5xl mx-auto space-y-8">
+        <h1 className="text-2xl sm:text-3xl font-bold">Manage Teachers</h1>
 
         {user.userType === "admin" && (
           <form
             onSubmit={handleAddTeacher}
-            className="bg-indigo-800 text-neutral-100 p-6 rounded-2xl shadow space-y-4"
+            className="bg-indigo-800 text-neutral-100 p-4 sm:p-6 rounded-2xl shadow space-y-4"
           >
-            <h2 className="text-lg font-medium">Add New Teacher</h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <h2 className="text-lg sm:text-xl font-medium">Add New Teacher</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
               <input
                 type="text"
                 placeholder="Full Name"
@@ -100,7 +133,7 @@ export default function ManageTeachers() {
                 onChange={(e) =>
                   setNewTeacher({ ...newTeacher, fullName: e.target.value })
                 }
-                className="w-full px-3 py-2 bg-neutral-100 text-indigo-800 border border-indigo-800 rounded-lg focus:ring-2 focus:ring-indigo-800"
+                className="w-full px-3 py-2 bg-neutral-100 text-indigo-800 border border-indigo-800 rounded focus:ring-2 focus:ring-indigo-800"
               />
               <input
                 type="email"
@@ -109,7 +142,7 @@ export default function ManageTeachers() {
                 onChange={(e) =>
                   setNewTeacher({ ...newTeacher, email: e.target.value })
                 }
-                className="w-full px-3 py-2 bg-neutral-100 text-indigo-800 border border-indigo-800 rounded-lg focus:ring-2 focus:ring-indigo-800"
+                className="w-full px-3 py-2 bg-neutral-100 text-indigo-800 border border-indigo-800 rounded focus:ring-2 focus:ring-indigo-800"
               />
               <input
                 type="password"
@@ -118,15 +151,15 @@ export default function ManageTeachers() {
                 onChange={(e) =>
                   setNewTeacher({ ...newTeacher, password: e.target.value })
                 }
-                className="w-full px-3 py-2 bg-neutral-100 text-indigo-800 border border-indigo-800 rounded-lg focus:ring-2 focus:ring-indigo-800"
+                className="w-full px-3 py-2 bg-neutral-100 text-indigo-800 border border-indigo-800 rounded focus:ring-2 focus:ring-indigo-800"
               />
             </div>
             <button
               type="submit"
               disabled={adding}
-              className="px-6 py-2 bg-neutral-100 text-indigo-800 font-semibold rounded-lg hover:bg-neutral-200 transition disabled:opacity-50"
+              className="w-full sm:w-auto px-6 py-2 bg-neutral-100 text-indigo-800 font-semibold rounded hover:bg-neutral-200 disabled:opacity-50"
             >
-              {adding ? "Adding..." : "Add Teacher"}
+              {adding ? "Adding…" : "Add Teacher"}
             </button>
           </form>
         )}
@@ -135,47 +168,138 @@ export default function ManageTeachers() {
           type="text"
           placeholder="Search by name..."
           value={searchTerm}
-          onChange={handleSearch}
-          className="w-full md:w-1/3 px-3 py-2 bg-neutral-100 text-indigo-800 border border-indigo-800 rounded-lg focus:ring-2 focus:ring-indigo-800"
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="w-full sm:w-1/2 md:w-1/3 px-3 py-2 bg-neutral-100 text-indigo-800 border border-indigo-800 rounded focus:ring-2 focus:ring-indigo-800"
         />
 
-        <div className="overflow-x-auto">
-          <table className="min-w-full bg-neutral-100 rounded-lg overflow-hidden shadow">
+        {/* Desktop view */}
+        <div className="hidden md:block overflow-x-auto">
+          <table className="w-full bg-neutral-100 rounded-lg shadow overflow-hidden table-auto">
             <thead className="bg-indigo-800 text-neutral-100">
               <tr>
-                <th className="px-6 py-3">Full Name</th>
-                <th className="px-6 py-3">Email</th>
-                <th className="px-6 py-3">Actions</th>
+                <th className="px-4 py-2 text-left">Full Name</th>
+                <th className="px-4 py-2 text-left">Email</th>
+                <th className="px-4 py-2 text-center">Actions</th>
               </tr>
             </thead>
             <tbody>
-              {filteredTeachers.map((t) => (
-                <tr key={t.id} className="hover:bg-neutral-200">
-                  <td className="px-6 py-4">{t.fullName}</td>
-                  <td className="px-6 py-4">{t.email}</td>
-                  <td className="px-6 py-4">
-                    {user.userType === "admin" && (
-                      <button
-                        onClick={() => handleDelete(t.id)}
-                        className="bg-indigo-800 text-neutral-100 px-3 py-1 rounded hover:bg-indigo-900"
-                      >
-                        Delete
-                      </button>
-                    )}
-                  </td>
-                </tr>
-              ))}
-              {filteredTeachers.length === 0 && (
+              {filtered.length === 0 ? (
                 <tr>
-                  <td colSpan="3" className="text-center py-4 text-indigo-800">
+                  <td colSpan="3" className="py-4 text-center">
                     No teachers found.
                   </td>
                 </tr>
+              ) : (
+                filtered.map((t) => (
+                  <tr key={t.id} className="hover:bg-neutral-200">
+                    <td className="px-4 py-2">{t.fullName}</td>
+                    <td className="px-4 py-2">{t.email}</td>
+                    <td className="px-4 py-2 text-center space-x-2">
+                      <button
+                        onClick={() => startEdit(t)}
+                        className="px-2 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm"
+                      >
+                        Edit
+                      </button>
+                      <button
+                        onClick={() => handleDelete(t.id)}
+                        className="px-2 py-1 bg-indigo-800 text-neutral-100 rounded hover:bg-indigo-900 text-sm"
+                      >
+                        Delete
+                      </button>
+                    </td>
+                  </tr>
+                ))
               )}
             </tbody>
           </table>
         </div>
+
+        {/* Mobile view */}
+        <div className="md:hidden space-y-4">
+          {filtered.length === 0 ? (
+            <p className="text-center">No teachers found.</p>
+          ) : (
+            filtered.map((t) => (
+              <div
+                key={t.id}
+                className="bg-neutral-100 p-4 rounded-lg shadow space-y-2"
+              >
+                <p className="font-semibold">{t.fullName}</p>
+                <p className="text-sm">{t.email}</p>
+                <div className="flex justify-end space-x-2">
+                  <button
+                    onClick={() => startEdit(t)}
+                    className="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm"
+                  >
+                    Edit
+                  </button>
+                  <button
+                    onClick={() => handleDelete(t.id)}
+                    className="px-3 py-1 bg-indigo-800 text-neutral-100 rounded hover:bg-indigo-900 text-sm"
+                  >
+                    Delete
+                  </button>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
       </div>
+
+      {/* Edit Modal */}
+      {editingTeacher && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50 p-4">
+          <div className="bg-neutral-100 text-indigo-800 rounded-lg p-6 w-full max-w-md space-y-4">
+            <h2 className="text-xl font-bold">Edit Teacher</h2>
+            <input
+              type="text"
+              value={editingTeacher.fullName}
+              onChange={(e) =>
+                setEditingTeacher({
+                  ...editingTeacher,
+                  fullName: e.target.value,
+                })
+              }
+              className="w-full px-3 py-2 border rounded focus:ring-2 focus:ring-indigo-800"
+            />
+            <input
+              type="email"
+              value={editingTeacher.email}
+              onChange={(e) =>
+                setEditingTeacher({ ...editingTeacher, email: e.target.value })
+              }
+              className="w-full px-3 py-2 border rounded focus:ring-2 focus:ring-indigo-800"
+            />
+            <input
+              type="password"
+              placeholder="New Password (optional)"
+              value={editingTeacher.password}
+              onChange={(e) =>
+                setEditingTeacher({
+                  ...editingTeacher,
+                  password: e.target.value,
+                })
+              }
+              className="w-full px-3 py-2 border rounded focus:ring-2 focus:ring-indigo-800"
+            />
+            <div className="flex justify-end space-x-2">
+              <button
+                onClick={() => setEditingTeacher(null)}
+                className="px-4 py-2 bg-gray-300 text-gray-800 rounded hover:bg-gray-400"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={saveEdit}
+                className="px-4 py-2 bg-indigo-800 text-neutral-100 rounded hover:bg-indigo-900"
+              >
+                Save
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
