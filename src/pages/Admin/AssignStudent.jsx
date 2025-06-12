@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import { useAuth } from "../../contexts/AuthContext";
 import { primaryAPI, secondaryAPI } from "../../api/axiosConfig";
 import Navbar from "../../components/Navbar";
-import AdminNavbar from "./AdminNavbar";
+
 import { toast } from "react-toastify";
 
 export default function AssignStudent() {
@@ -71,7 +71,6 @@ export default function AssignStudent() {
   return (
     <div className="min-h-screen bg-neutral-100 text-indigo-800 p-6">
       <Navbar />
-      <AdminNavbar />
 
       <div className="max-w-lg mx-auto space-y-6">
         <h1 className="text-2xl font-bold">Assign Student to Teacher</h1>

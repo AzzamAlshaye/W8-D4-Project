@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import { useAuth } from "../../contexts/AuthContext";
 import { primaryAPI } from "../../api/axiosConfig";
 import Navbar from "../../components/Navbar";
-import AdminNavbar from "./AdminNavbar";
+
 import { toast } from "react-toastify";
 
 export default function ManageTeachers() {
@@ -82,7 +82,6 @@ export default function ManageTeachers() {
   return (
     <div className="min-h-screen bg-neutral-100 text-indigo-800 p-6">
       <Navbar />
-      <AdminNavbar />
 
       <div className="max-w-4xl mx-auto space-y-6">
         <h1 className="text-2xl font-bold">Manage Teachers</h1>
