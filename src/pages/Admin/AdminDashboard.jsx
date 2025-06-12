@@ -37,10 +37,11 @@ export default function AdminDashboard() {
   useEffect(() => {
     const fetchStats = async () => {
       try {
+        // Fetch students & teachers via /auth filtered by userType
         const [studentsRes, teachersRes, ideasRes, assignmentsRes] =
           await Promise.all([
-            primaryAPI.get("/students"),
-            primaryAPI.get("/teachers"),
+            primaryAPI.get("/auth", { params: { userType: "student" } }),
+            primaryAPI.get("/auth", { params: { userType: "teacher" } }),
             secondaryAPI.get("/ideas"),
             secondaryAPI.get("/assignments"),
           ]);
@@ -63,9 +64,8 @@ export default function AdminDashboard() {
 
         const studentsPerTeacher = {};
         assignments.forEach((a) => {
-          const teacherName = a.teacherName || a.teacherId;
-          studentsPerTeacher[teacherName] =
-            (studentsPerTeacher[teacherName] || 0) + 1;
+          const name = a.teacherName || a.teacherId;
+          studentsPerTeacher[name] = (studentsPerTeacher[name] || 0) + 1;
         });
 
         setStats({
