@@ -17,7 +17,6 @@ export default function SubmitIdea() {
 
   const fetchMyIdeas = async () => {
     try {
-      // fetch all and then filter by studentName
       const res = await secondaryAPI.get("/ideas");
       const filtered = res.data.filter(
         (idea) => idea.studentName === user.fullName
@@ -40,7 +39,7 @@ export default function SubmitIdea() {
       await secondaryAPI.post("/ideas", {
         title: newIdea.title,
         description: newIdea.description,
-        studentId: user.id, // still send it, even if API ignores it
+        studentId: user.id,
         studentName: user.fullName,
         status: "pending",
         reason: "",
@@ -55,19 +54,23 @@ export default function SubmitIdea() {
   };
 
   return (
-    <div className="min-h-screen bg-indigo-800 text-neutral-100 p-6">
+    <div className="min-h-screen bg-neutral-100 text-indigo-800 p-6">
       <ToastContainer position="top-center" />
       <Navbar />
 
       <div className="max-w-4xl mx-auto space-y-6">
-        <h1 className="text-2xl font-bold">Submit a New Project Idea</h1>
+        <h1 className="text-2xl font-bold text-indigo-800">
+          Submit a New Project Idea
+        </h1>
 
         <form
           onSubmit={handleSubmit}
-          className="bg-neutral-100 text-indigo-800 rounded-2xl shadow p-6 space-y-4"
+          className="bg-white text-indigo-800 rounded-2xl shadow p-6 space-y-4"
         >
           <div>
-            <label className="block font-medium mb-1">Title:</label>
+            <label className="block font-medium mb-1 text-indigo-800">
+              Title:
+            </label>
             <input
               type="text"
               value={newIdea.title}
@@ -79,7 +82,9 @@ export default function SubmitIdea() {
             />
           </div>
           <div>
-            <label className="block font-medium mb-1">Description:</label>
+            <label className="block font-medium mb-1 text-indigo-800">
+              Description:
+            </label>
             <textarea
               rows="4"
               value={newIdea.description}
@@ -92,42 +97,76 @@ export default function SubmitIdea() {
           </div>
           <button
             type="submit"
-            className="bg-neutral-100 text-indigo-800 font-semibold rounded-lg px-6 py-2 hover:bg-neutral-200 transition"
+            className="bg-indigo-800 text-neutral-100 font-semibold rounded-lg px-6 py-2 hover:bg-indigo-900 transition"
           >
             Submit Idea
           </button>
         </form>
 
         <div>
-          <h2 className="text-xl font-medium mb-2 text-neutral-100">
+          <h2 className="text-xl font-medium mb-2 text-indigo-800">
             My Project Ideas
           </h2>
-          {myIdeas.length === 0 ? (
-            <p className="text-neutral-300">
-              You have not submitted any ideas yet.
-            </p>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="min-w-full bg-neutral-100 rounded-lg overflow-hidden shadow">
+
+          {/* Desktop Table */}
+          <div className="hidden md:block overflow-x-auto">
+            {myIdeas.length === 0 ? (
+              <p className="text-indigo-600">
+                You have not submitted any ideas yet.
+              </p>
+            ) : (
+              <table className="min-w-full bg-white rounded-lg overflow-hidden shadow">
                 <thead className="bg-indigo-800 text-neutral-100">
                   <tr>
-                    <th className="px-6 py-3">Title</th>
-                    <th className="px-6 py-3">Status</th>
-                    <th className="px-6 py-3">Reason</th>
+                    <th className="px-6 py-3 text-left">Title</th>
+                    <th className="px-6 py-3 text-left">Status</th>
+                    <th className="px-6 py-3 text-left">Reason</th>
                   </tr>
                 </thead>
                 <tbody>
                   {myIdeas.map((idea) => (
                     <tr key={idea.id} className="hover:bg-neutral-200">
-                      <td className="px-6 py-4">{idea.title}</td>
-                      <td className="px-6 py-4 capitalize">{idea.status}</td>
-                      <td className="px-6 py-4">{idea.reason || "—"}</td>
+                      <td className="px-6 py-4 text-indigo-800">
+                        {idea.title}
+                      </td>
+                      <td className="px-6 py-4 capitalize text-indigo-800">
+                        {idea.status}
+                      </td>
+                      <td className="px-6 py-4 text-indigo-800">
+                        {idea.reason || "—"}
+                      </td>
                     </tr>
                   ))}
                 </tbody>
               </table>
-            </div>
-          )}
+            )}
+          </div>
+
+          {/* Mobile Cards */}
+          <div className="md:hidden space-y-4">
+            {myIdeas.length === 0 ? (
+              <p className="text-indigo-600 text-center">
+                You have not submitted any ideas yet.
+              </p>
+            ) : (
+              myIdeas.map((idea) => (
+                <div
+                  key={idea.id}
+                  className="bg-white p-4 rounded-lg shadow space-y-2"
+                >
+                  <p className="font-semibold text-indigo-800">{idea.title}</p>
+                  <p className="text-sm text-indigo-800">
+                    <strong>Status:</strong> {idea.status}
+                  </p>
+                  {idea.reason && (
+                    <p className="text-sm text-indigo-800">
+                      <strong>Reason:</strong> {idea.reason}
+                    </p>
+                  )}
+                </div>
+              ))
+            )}
+          </div>
         </div>
       </div>
     </div>
