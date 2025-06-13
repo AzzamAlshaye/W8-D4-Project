@@ -134,10 +134,10 @@ export default function ManageIdeas() {
   );
 
   return (
-    <div className="min-h-screen bg-neutral-100 text-indigo-800 p-4 sm:p-6 lg:p-8">
+    <div className="min-h-screen bg-neutral-100 text-indigo-800  p-4 sm:p-6 lg:p-8">
       <ToastContainer position="top-center" />
 
-      <div className="max-w-5xl mx-auto space-y-6">
+      <div className="max-w-5xl mx-auto space-y-6 mt-10">
         <h1 className="text-2xl sm:text-3xl font-bold">Manage Project Ideas</h1>
 
         <input
