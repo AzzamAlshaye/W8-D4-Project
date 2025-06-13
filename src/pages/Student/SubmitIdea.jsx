@@ -108,7 +108,7 @@ export default function SubmitIdea() {
             My Project Ideas
           </h2>
 
-          {/* Desktop Table */}
+          {/* Desktop Table with Description */}
           <div className="hidden md:block overflow-x-auto">
             {myIdeas.length === 0 ? (
               <p className="text-indigo-600">
@@ -119,6 +119,7 @@ export default function SubmitIdea() {
                 <thead className="bg-indigo-800 text-neutral-100">
                   <tr>
                     <th className="px-6 py-3 text-left">Title</th>
+                    <th className="px-6 py-3 text-left">Description</th>
                     <th className="px-6 py-3 text-left">Status</th>
                     <th className="px-6 py-3 text-left">Reason</th>
                   </tr>
@@ -128,6 +129,11 @@ export default function SubmitIdea() {
                     <tr key={idea.id} className="hover:bg-neutral-200">
                       <td className="px-6 py-4 text-indigo-800">
                         {idea.title}
+                      </td>
+                      <td className="px-6 py-4 text-indigo-800">
+                        {idea.description.length > 50
+                          ? idea.description.slice(0, 50) + "..."
+                          : idea.description}
                       </td>
                       <td className="px-6 py-4 capitalize text-indigo-800">
                         {idea.status}
@@ -142,7 +148,7 @@ export default function SubmitIdea() {
             )}
           </div>
 
-          {/* Mobile Cards */}
+          {/* Mobile Cards including short Description */}
           <div className="md:hidden space-y-4">
             {myIdeas.length === 0 ? (
               <p className="text-indigo-600 text-center">
@@ -155,6 +161,12 @@ export default function SubmitIdea() {
                   className="bg-white p-4 rounded-lg shadow space-y-2"
                 >
                   <p className="font-semibold text-indigo-800">{idea.title}</p>
+                  <p className="text-sm text-indigo-800">
+                    <strong>Description:</strong>{" "}
+                    {idea.description.length > 100
+                      ? idea.description.slice(0, 100) + "..."
+                      : idea.description}
+                  </p>
                   <p className="text-sm text-indigo-800">
                     <strong>Status:</strong> {idea.status}
                   </p>

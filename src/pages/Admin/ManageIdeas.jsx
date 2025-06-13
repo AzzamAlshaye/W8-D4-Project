@@ -150,30 +150,32 @@ export default function ManageIdeas() {
           className="w-full md:w-1/3 px-3 py-2 bg-neutral-100 text-indigo-800 border border-indigo-800 rounded focus:ring-2 focus:ring-indigo-800"
         />
 
-        {/* Desktop table */}
+        {/* Desktop Table with Description */}
         <div className="hidden md:block overflow-x-auto">
-          <table className="w-full bg-neutral-100 rounded-lg shadow overflow-hidden table-auto">
-            <thead className="bg-indigo-800 text-neutral-100">
-              <tr>
-                <th className="px-4 py-2 text-left">Title</th>
-                <th className="px-4 py-2 text-left">Student</th>
-                <th className="px-4 py-2 text-left">Status</th>
-                <th className="px-4 py-2 text-left">Reason</th>
-                <th className="px-4 py-2 text-center">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filtered.length === 0 ? (
+          {filtered.length === 0 ? (
+            <p className="py-4 text-center">No ideas found.</p>
+          ) : (
+            <table className="w-full bg-neutral-100 rounded-lg shadow overflow-hidden table-auto">
+              <thead className="bg-indigo-800 text-neutral-100">
                 <tr>
-                  <td colSpan="5" className="py-4 text-center">
-                    No ideas found.
-                  </td>
+                  <th className="px-4 py-2 text-left">Title</th>
+                  <th className="px-4 py-2 text-left">Student</th>
+                  <th className="px-4 py-2 text-left">Description</th>
+                  <th className="px-4 py-2 text-left">Status</th>
+                  <th className="px-4 py-2 text-left">Reason</th>
+                  <th className="px-4 py-2 text-center">Actions</th>
                 </tr>
-              ) : (
-                filtered.map((i) => (
+              </thead>
+              <tbody>
+                {filtered.map((i) => (
                   <tr key={i.id} className="hover:bg-neutral-200">
                     <td className="px-4 py-2">{i.title}</td>
                     <td className="px-4 py-2">{i.studentName}</td>
+                    <td className="px-4 py-2">
+                      {i.description.length > 50
+                        ? i.description.slice(0, 50) + "..."
+                        : i.description}
+                    </td>
                     <td className="px-4 py-2 capitalize">{i.status}</td>
                     <td className="px-4 py-2">{i.reason || "—"}</td>
                     <td className="px-4 py-2 text-center space-x-1">
@@ -207,13 +209,13 @@ export default function ManageIdeas() {
                       </button>
                     </td>
                   </tr>
-                ))
-              )}
-            </tbody>
-          </table>
+                ))}
+              </tbody>
+            </table>
+          )}
         </div>
 
-        {/* Mobile cards */}
+        {/* Mobile Cards including short Description */}
         <div className="md:hidden space-y-4">
           {filtered.length === 0 ? (
             <p className="text-center">No ideas found.</p>
@@ -223,13 +225,19 @@ export default function ManageIdeas() {
                 key={i.id}
                 className="bg-neutral-100 p-4 rounded-lg shadow space-y-2"
               >
-                <p className="font-semibold">{i.title}</p>
-                <p className="text-sm">By: {i.studentName}</p>
-                <p className="text-sm">
+                <p className="font-semibold text-indigo-800">{i.title}</p>
+                <p className="text-sm text-indigo-800">By: {i.studentName}</p>
+                <p className="text-sm text-indigo-800">
+                  <strong>Description:</strong>{" "}
+                  {i.description.length > 100
+                    ? i.description.slice(0, 100) + "..."
+                    : i.description}
+                </p>
+                <p className="text-sm text-indigo-800">
                   <strong>Status:</strong> {i.status}
                 </p>
                 {i.reason && (
-                  <p className="text-sm">
+                  <p className="text-sm text-indigo-800">
                     <strong>Reason:</strong> {i.reason}
                   </p>
                 )}

@@ -13,23 +13,17 @@ export default function ReviewIdeas() {
 
   useEffect(() => {
     fetchStudentsAndIdeas();
-  }, [user]);
+  }, [user.id]);
 
   const fetchStudentsAndIdeas = async () => {
-    if (!user?.id) {
-      setIdeas([]);
-      return;
-    }
+    if (!user?.id) return setIdeas([]);
     try {
       const assignmentsRes = await secondaryAPI.get(
         `/assignments?teacherId=${user.id}`
       );
-      const assignedStudents = assignmentsRes.data.map((a) => a.studentId);
-      if (assignedStudents.length === 0) {
-        setIdeas([]);
-        return;
-      }
-      const query = assignedStudents.map((id) => `studentId=${id}`).join("&");
+      const studentIds = assignmentsRes.data.map((a) => a.studentId);
+      if (!studentIds.length) return setIdeas([]);
+      const query = studentIds.map((id) => `studentId=${id}`).join("&");
       const ideasRes = await secondaryAPI.get(`/ideas?${query}`);
       setIdeas(ideasRes.data);
     } catch (err) {
@@ -70,14 +64,14 @@ export default function ReviewIdeas() {
     );
   };
 
-  const updateStatus = async (ideaId, newStatus) => {
-    if (newStatus === "rejected") {
+  const updateStatus = async (ideaId, status) => {
+    if (status === "rejected") {
       const toastId = toast.info(
         <div className="space-y-2 text-sm">
-          <p>Please provide reason for rejection:</p>
+          <p>Reason for rejection:</p>
           <textarea
             id={`reason-${ideaId}`}
-            rows="3"
+            rows={3}
             className="w-full border rounded p-1 focus:ring-2 focus:ring-indigo-800"
             onKeyDown={(e) => e.stopPropagation()}
           />
@@ -89,7 +83,7 @@ export default function ReviewIdeas() {
                 ).value;
                 try {
                   await secondaryAPI.put(`/ideas/${ideaId}`, {
-                    status: "rejected",
+                    status,
                     reason,
                   });
                   toast.dismiss(toastId);
@@ -115,10 +109,7 @@ export default function ReviewIdeas() {
       );
     } else {
       try {
-        await secondaryAPI.put(`/ideas/${ideaId}`, {
-          status: "accepted",
-          reason: "",
-        });
+        await secondaryAPI.put(`/ideas/${ideaId}`, { status, reason: "" });
         toast.success("Idea accepted");
         fetchStudentsAndIdeas();
       } catch {
@@ -127,9 +118,7 @@ export default function ReviewIdeas() {
     }
   };
 
-  const openEdit = (idea) => {
-    setEditingIdea({ ...idea });
-  };
+  const openEdit = (idea) => setEditingIdea({ ...idea });
 
   const saveEditedIdea = async () => {
     try {
@@ -153,30 +142,32 @@ export default function ReviewIdeas() {
       <div className="max-w-5xl mx-auto space-y-6">
         <h1 className="text-2xl sm:text-3xl font-bold">Review Project Ideas</h1>
 
-        {/* Desktop Table */}
+        {/* Desktop Table with Description */}
         <div className="hidden md:block overflow-x-auto">
-          <table className="w-full bg-neutral-100 rounded-lg shadow overflow-hidden table-auto">
-            <thead className="bg-indigo-800 text-neutral-100">
-              <tr>
-                <th className="px-4 py-2 text-left">Title</th>
-                <th className="px-4 py-2 text-left">Student</th>
-                <th className="px-4 py-2 text-left">Status</th>
-                <th className="px-4 py-2 text-left">Reason</th>
-                <th className="px-4 py-2 text-center">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {ideas.length === 0 ? (
+          {ideas.length === 0 ? (
+            <p className="py-4 text-center">No ideas from your students.</p>
+          ) : (
+            <table className="w-full bg-neutral-100 rounded-lg shadow overflow-hidden table-auto">
+              <thead className="bg-indigo-800 text-neutral-100">
                 <tr>
-                  <td colSpan="5" className="py-4 text-center">
-                    No ideas from your students.
-                  </td>
+                  <th className="px-4 py-2 text-left">Title</th>
+                  <th className="px-4 py-2 text-left">Student</th>
+                  <th className="px-4 py-2 text-left">Description</th>
+                  <th className="px-4 py-2 text-left">Status</th>
+                  <th className="px-4 py-2 text-left">Reason</th>
+                  <th className="px-4 py-2 text-center">Actions</th>
                 </tr>
-              ) : (
-                ideas.map((idea) => (
+              </thead>
+              <tbody>
+                {ideas.map((idea) => (
                   <tr key={idea.id} className="hover:bg-neutral-200">
                     <td className="px-4 py-2">{idea.title}</td>
                     <td className="px-4 py-2">{idea.studentName}</td>
+                    <td className="px-4 py-2">
+                      {idea.description.length > 50
+                        ? idea.description.slice(0, 50) + "..."
+                        : idea.description}
+                    </td>
                     <td className="px-4 py-2 capitalize">{idea.status}</td>
                     <td className="px-4 py-2">{idea.reason || "—"}</td>
                     <td className="px-4 py-2 text-center space-x-1">
@@ -210,13 +201,13 @@ export default function ReviewIdeas() {
                       </button>
                     </td>
                   </tr>
-                ))
-              )}
-            </tbody>
-          </table>
+                ))}
+              </tbody>
+            </table>
+          )}
         </div>
 
-        {/* Mobile Cards */}
+        {/* Mobile Cards including short Description */}
         <div className="md:hidden space-y-4">
           {ideas.length === 0 ? (
             <p className="text-center">No ideas from your students.</p>
@@ -226,13 +217,21 @@ export default function ReviewIdeas() {
                 key={idea.id}
                 className="bg-neutral-100 p-4 rounded-lg shadow space-y-2"
               >
-                <p className="font-semibold">{idea.title}</p>
-                <p className="text-sm">By: {idea.studentName}</p>
-                <p className="text-sm">
+                <p className="font-semibold text-indigo-800">{idea.title}</p>
+                <p className="text-sm text-indigo-800">
+                  By: {idea.studentName}
+                </p>
+                <p className="text-sm text-indigo-800">
+                  <strong>Description:</strong>{" "}
+                  {idea.description.length > 100
+                    ? idea.description.slice(0, 100) + "..."
+                    : idea.description}
+                </p>
+                <p className="text-sm text-indigo-800">
                   <strong>Status:</strong> {idea.status}
                 </p>
                 {idea.reason && (
-                  <p className="text-sm">
+                  <p className="text-sm text-indigo-800">
                     <strong>Reason:</strong> {idea.reason}
                   </p>
                 )}
@@ -287,10 +286,7 @@ export default function ReviewIdeas() {
                 type="text"
                 value={editingIdea.title}
                 onChange={(e) =>
-                  setEditingIdea({
-                    ...editingIdea,
-                    title: e.target.value,
-                  })
+                  setEditingIdea({ ...editingIdea, title: e.target.value })
                 }
                 className="mt-1 block w-full border rounded p-2 focus:ring-2 focus:ring-indigo-800"
               />
@@ -298,7 +294,7 @@ export default function ReviewIdeas() {
             <label className="block">
               <span className="font-medium">Description:</span>
               <textarea
-                rows="4"
+                rows={4}
                 value={editingIdea.description}
                 onChange={(e) =>
                   setEditingIdea({
