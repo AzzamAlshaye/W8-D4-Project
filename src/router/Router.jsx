@@ -6,7 +6,7 @@ import { AuthProvider } from "../contexts/AuthContext";
 import ProtectedRoute from "../components/ProtectedRoute";
 
 // ── Public Pages ──────────────────────────────────────────────────────
-// import HomePage from "../pages/HomePage";
+import HomePage from "../pages/HomePage";
 import LoginPage from "../Auth/LoginPage";
 import Register from "../Auth/Register";
 
@@ -43,7 +43,7 @@ const router = createBrowserRouter([
       </AuthProvider>
     ),
     children: [
-      // { index: true, element: <HomePage /> },
+      { index: true, element: <HomePage /> },
       { path: "login", element: <LoginPage /> },
       { path: "register", element: <Register /> },
 
