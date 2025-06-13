@@ -37,7 +37,6 @@ export default function AdminDashboard() {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        // Fetch students & teachers via /auth filtered by userType
         const [studentsRes, teachersRes, ideasRes, assignmentsRes] =
           await Promise.all([
             primaryAPI.get("/auth", { params: { userType: "student" } }),
@@ -95,6 +94,7 @@ export default function AdminDashboard() {
     labels: ["Pending", "Accepted", "Rejected"],
     datasets: [
       {
+        label: "Ideas",
         data: [
           ideasByStatus.pending,
           ideasByStatus.accepted,
@@ -110,10 +110,27 @@ export default function AdminDashboard() {
     labels: Object.keys(studentsPerTeacher),
     datasets: [
       {
+        label: "Students",
         data: Object.values(studentsPerTeacher),
         backgroundColor: "#3b82f6",
       },
     ],
+  };
+
+  const chartOptions = {
+    plugins: {
+      legend: {
+        labels: { color: "#ffffff" },
+      },
+      tooltip: {
+        titleColor: "#ffffff",
+        bodyColor: "#ffffff",
+      },
+    },
+    scales: {
+      x: { ticks: { color: "#ffffff" } },
+      y: { beginAtZero: true, ticks: { stepSize: 1, color: "#ffffff" } },
+    },
   };
 
   return (
@@ -141,18 +158,11 @@ export default function AdminDashboard() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           <div className="bg-indigo-800 text-neutral-100 rounded-lg shadow p-6">
             <h3 className="text-lg font-medium mb-4">Ideas by Status</h3>
-            <Doughnut data={doughnutData} />
+            <Doughnut data={doughnutData} options={chartOptions} />
           </div>
           <div className="bg-indigo-800 text-neutral-100 rounded-lg shadow p-6">
             <h3 className="text-lg font-medium mb-4">Students per Teacher</h3>
-            <Bar
-              data={barData}
-              options={{
-                scales: {
-                  y: { beginAtZero: true, ticks: { stepSize: 1 } },
-                },
-              }}
-            />
+            <Bar data={barData} options={chartOptions} />
           </div>
         </div>
       </div>
