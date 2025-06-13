@@ -2,7 +2,6 @@
 import React, { useEffect, useState } from "react";
 import { useAuth } from "../../contexts/AuthContext";
 import { secondaryAPI } from "../../api/axiosConfig";
-import Navbar from "../../components/Navbar";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -56,7 +55,6 @@ export default function SubmitIdea() {
   return (
     <div className="min-h-screen bg-neutral-100 text-indigo-800 p-6">
       <ToastContainer position="top-center" />
-      <Navbar />
 
       <div className="max-w-4xl mx-auto space-y-6">
         <h1 className="text-2xl font-bold text-indigo-800">

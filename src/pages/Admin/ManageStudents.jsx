@@ -2,7 +2,6 @@
 import React, { useEffect, useState } from "react";
 import { useAuth } from "../../contexts/AuthContext";
 import { primaryAPI } from "../../api/axiosConfig";
-import Navbar from "../../components/Navbar";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -145,9 +144,8 @@ export default function ManageStudents() {
   return (
     <div className="min-h-screen bg-neutral-100 text-indigo-800 p-4 sm:p-6 lg:p-8">
       <ToastContainer position="top-center" />
-      <Navbar />
 
-      <div className="max-w-5xl mx-auto space-y-8">
+      <div className="max-w-5xl mx-auto space-y-8 mt-10">
         <h1 className="text-2xl sm:text-3xl font-bold">Manage Students</h1>
 
         {user.userType === "admin" && (

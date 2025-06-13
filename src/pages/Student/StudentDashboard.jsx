@@ -2,8 +2,6 @@
 import React, { useEffect, useState } from "react";
 import { useAuth } from "../../contexts/AuthContext";
 import { secondaryAPI, primaryAPI } from "../../api/axiosConfig";
-import Navbar from "../../components/Navbar";
-
 export default function StudentDashboard() {
   const { user } = useAuth();
   const [assignedTeacher, setAssignedTeacher] = useState({
@@ -73,7 +71,6 @@ export default function StudentDashboard() {
 
   return (
     <div className="min-h-screen bg-neutral-100 text-indigo-800 p-6">
-      <Navbar />
       <div className="max-w-4xl mx-auto space-y-6">
         <h1 className="text-2xl font-bold">Welcome, {user.fullName}</h1>
 

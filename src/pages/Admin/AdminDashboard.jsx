@@ -2,8 +2,6 @@
 import React, { useEffect, useState } from "react";
 import { useAuth } from "../../contexts/AuthContext";
 import { primaryAPI, secondaryAPI } from "../../api/axiosConfig";
-import Navbar from "../../components/Navbar";
-
 import {
   Chart as ChartJS,
   ArcElement,
@@ -135,8 +133,6 @@ export default function AdminDashboard() {
 
   return (
     <div className="min-h-screen bg-neutral-100 text-indigo-800 p-6">
-      <Navbar />
-
       <div className="p-6 space-y-8">
         <h1 className="text-2xl font-bold">Admin Dashboard</h1>
 
