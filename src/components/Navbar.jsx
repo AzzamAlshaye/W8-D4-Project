@@ -44,7 +44,7 @@ export default function Navbar() {
               logout();
               toast.dismiss(id);
             }}
-            className="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700 "
+            className="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700"
           >
             Yes
           </button>
@@ -64,9 +64,13 @@ export default function Navbar() {
     <>
       <ToastContainer position="top-center" />
       <nav className="bg-indigo-900 text-white px-4 py-3 flex items-center justify-between relative">
-        {/* Logo/Home */}
-        <Link to="/" className="text-lg font-semibold hover:text-gray-300">
-          Home
+        {/* Logo/Home with white background */}
+        <Link
+          to="/"
+          className="p-0.5 bg-neutral-100 rounded hover:bg-gray-100 flex items-center 
+        "
+        >
+          <img src="/logo-h.png" alt="Logo" className=" w-35  object-cover  " />
         </Link>
 
         {/* Desktop Links */}
@@ -136,7 +140,7 @@ export default function Navbar() {
                     setMobileMenuOpen(false);
                     confirmLogout();
                   }}
-                  className="w-full text-center px-3 py-2 bg-red-600 rounded hover:bg-red-700 text-sm "
+                  className="w-full text-left px-3 py-2 bg-red-600 rounded hover:bg-red-700 text-sm"
                 >
                   Logout
                 </button>
