@@ -16,6 +16,7 @@ function MainLayout() {
     <>
       <Navbar />
       <Outlet />
+      <Footer />
     </>
   );
 }
@@ -42,6 +43,7 @@ import SubmitIdea from "../pages/Student/SubmitIdea";
 
 // Fallback
 import NotFound from "../pages/NotFound";
+import Footer from "../components/Footer";
 
 const router = createBrowserRouter([
   {
