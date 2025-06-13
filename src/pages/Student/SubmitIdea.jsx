@@ -1,23 +1,28 @@
 // src/pages/Student/SubmitIdea.jsx
 import React, { useEffect, useState } from "react";
 import { useAuth } from "../../contexts/AuthContext";
-import { primaryAPI, secondaryAPI } from "../../api/axiosConfig";
+import { secondaryAPI } from "../../api/axiosConfig";
 import Navbar from "../../components/Navbar";
-import { toast } from "react-toastify";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 export default function SubmitIdea() {
-  const { user } = useAuth();
+  const { user } = useAuth(); // user has { id, fullName, ... }
   const [myIdeas, setMyIdeas] = useState([]);
   const [newIdea, setNewIdea] = useState({ title: "", description: "" });
 
   useEffect(() => {
     fetchMyIdeas();
-  }, []);
+  }, [user.fullName]);
 
   const fetchMyIdeas = async () => {
     try {
-      const res = await secondaryAPI.get(`/ideas?studentId=${user.userId}`);
-      setMyIdeas(res.data);
+      // fetch all and then filter by studentName
+      const res = await secondaryAPI.get("/ideas");
+      const filtered = res.data.filter(
+        (idea) => idea.studentName === user.fullName
+      );
+      setMyIdeas(filtered);
     } catch (err) {
       console.error(err);
       toast.error("Failed to fetch your ideas");
@@ -35,7 +40,7 @@ export default function SubmitIdea() {
       await secondaryAPI.post("/ideas", {
         title: newIdea.title,
         description: newIdea.description,
-        studentId: user.userId,
+        studentId: user.id, // still send it, even if API ignores it
         studentName: user.fullName,
         status: "pending",
         reason: "",
@@ -51,7 +56,9 @@ export default function SubmitIdea() {
 
   return (
     <div className="min-h-screen bg-indigo-800 text-neutral-100 p-6">
+      <ToastContainer position="top-center" />
       <Navbar />
+
       <div className="max-w-4xl mx-auto space-y-6">
         <h1 className="text-2xl font-bold">Submit a New Project Idea</h1>
 
