@@ -37,14 +37,14 @@ export default function StudentDashboard() {
   }, [user.userId]);
 
   return (
-    <div className="min-h-screen bg-indigo-800 text-neutral-100 p-6">
+    <div className="min-h-screen bg-neutral-100 text-indigo-800 p-6">
       <Navbar />
       <div className="max-w-4xl mx-auto space-y-6">
         <h1 className="text-2xl font-bold">Welcome, {user.fullName}</h1>
 
         <div>
           <h2 className="text-xl font-medium mb-2">Assigned Teacher:</h2>
-          <p className="text-neutral-300">
+          <p className="text-indigo-900">
             {assignedTeacher || "Not assigned yet."}
           </p>
         </div>
@@ -52,11 +52,11 @@ export default function StudentDashboard() {
         <div>
           <h2 className="text-xl font-medium mb-2">Approved Project Ideas:</h2>
           {approvedIdeas.length === 0 ? (
-            <p className="text-neutral-300">No approved ideas yet.</p>
+            <p className="text-indigo-900">No approved ideas yet.</p>
           ) : (
             <ul className="list-disc list-inside space-y-2">
               {approvedIdeas.map((idea) => (
-                <li key={idea.id} className="text-neutral-100">
+                <li key={idea.id} className="text-indigo-800">
                   {idea.title} (by {idea.studentName})
                 </li>
               ))}

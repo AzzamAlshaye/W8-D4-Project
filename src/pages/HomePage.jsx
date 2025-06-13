@@ -1,9 +1,19 @@
 // src/pages/HomeScreen.jsx
 import React from "react";
 import { Link } from "react-router";
+import { useAuth } from "../contexts/AuthContext";
 
 export default function HomeScreen() {
   const isAuth = localStorage.getItem("isAuthenticated") === "true";
+  // get the user object (we only ever store id, fullName, email, userType)
+  const raw = localStorage.getItem("user");
+  const user = raw ? JSON.parse(raw) : null;
+
+  // decide where “dashboard” should go
+  let dashboardPath = "/";
+  if (user?.userType === "admin") dashboardPath = "/admin";
+  else if (user?.userType === "teacher") dashboardPath = "/teacher";
+  else if (user?.userType === "student") dashboardPath = "/student";
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-neutral-100 flex items-center justify-center px-6">
@@ -30,7 +40,7 @@ export default function HomeScreen() {
         <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
           {isAuth ? (
             <Link
-              to="/"
+              to={dashboardPath}
               className="inline-block px-8 py-3 bg-indigo-700 text-neutral-100 font-semibold rounded-full shadow-lg transform transition hover:scale-105"
             >
               Go to Dashboard
