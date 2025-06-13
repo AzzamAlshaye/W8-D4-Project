@@ -9,7 +9,7 @@ import { FaDiscord } from "react-icons/fa";
 
 function Footer() {
   return (
-    <footer className="flex flex-col w-full px-5 py-6 text-white bg-indigo-800 gap-y-3 md:px-5 lg:px-25">
+    <footer className="flex flex-col w-full px-5 py-6 text-white bg-indigo-900 gap-y-3 md:px-5 lg:px-25">
       <div className="flex flex-col items-center md:flex-row md:justify-between gap-y-4">
         <div className="flex flex-col">
           <h1 className="text-2xl font-bold">
@@ -27,9 +27,12 @@ function Footer() {
           <ul className="flex flex-col gap-y-0.5 pl-1.5">
             <li className="text-sm md:text-base text-neutral-100">
               Email:{" "}
-              <span className="text-xs md:text-sm text-neutral-100">
+              <a
+                href="mailto:Admin@tuwaiq.edu.sa"
+                className="text-xs md:text-sm text-neutral-100 hover:underline"
+              >
                 Admin@tuwaiq.edu.sa
-              </span>
+              </a>
             </li>
             <li className="text-sm md:text-base text-neutral-100">
               Phone:{" "}
