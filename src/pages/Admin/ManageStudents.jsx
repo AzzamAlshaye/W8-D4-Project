@@ -1,7 +1,7 @@
 // src/pages/Admin/ManageStudents.jsx
 import React, { useEffect, useState } from "react";
 import { useAuth } from "../../contexts/AuthContext";
-import { primaryAPI } from "../../api/axiosConfig";
+import { primaryAPI, secondaryAPI } from "../../api/axiosConfig"; // make sure secondaryAPI is imported
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -15,9 +15,7 @@ export default function ManageStudents() {
     password: "",
   });
   const [adding, setAdding] = useState(false);
-
-  // Edit state
-  const [editing, setEditing] = useState(null); // { id, fullName, email, password }
+  const [editing, setEditing] = useState(null);
 
   useEffect(() => {
     fetchStudents();
@@ -29,8 +27,7 @@ export default function ManageStudents() {
         params: { userType: "student" },
       });
       setStudents(res.data);
-    } catch (err) {
-      console.error(err);
+    } catch {
       toast.error("Failed to fetch students");
     }
   }
@@ -65,10 +62,31 @@ export default function ManageStudents() {
     }
   }
 
+  // delete student + all their assignments and ideas
   async function handleDelete(id) {
     try {
+      // 1) delete assignments
+      const { data: assigns } = await secondaryAPI.get("/assignments");
+      const studentAssigns = assigns.filter(
+        (a) => String(a.studentId) === String(id)
+      );
+      await Promise.all(
+        studentAssigns.map((a) => secondaryAPI.delete(`/assignments/${a.id}`))
+      );
+
+      // 2) delete ideas
+      const { data: ideas } = await secondaryAPI.get("/ideas");
+      const studentIdeas = ideas.filter(
+        (i) => String(i.studentId) === String(id)
+      );
+      await Promise.all(
+        studentIdeas.map((i) => secondaryAPI.delete(`/ideas/${i.id}`))
+      );
+
+      // 3) delete student
       await primaryAPI.delete(`/auth/${id}`);
-      toast.success("Student deleted");
+
+      toast.success("Student and all related data deleted");
       fetchStudents();
     } catch {
       toast.error("Failed to delete student");
@@ -79,7 +97,7 @@ export default function ManageStudents() {
     const idToast = toast.info(
       <div className="space-y-2 text-sm">
         <p>
-          Delete <strong>{name}</strong>?
+          Delete <strong>{name}</strong> and all their ideas & assignments?
         </p>
         <div className="flex justify-end space-x-2">
           <button
@@ -201,7 +219,7 @@ export default function ManageStudents() {
           className="w-full sm:w-1/2 md:w-1/3 px-3 py-2 bg-neutral-100 text-indigo-800 border border-indigo-800 rounded focus:ring-2 focus:ring-indigo-800"
         />
 
-        {/* Desktop table */}
+        {/* Desktop */}
         <div className="hidden md:block overflow-x-auto">
           <table className="w-full bg-neutral-100 rounded-lg shadow overflow-hidden table-auto">
             <thead className="bg-indigo-800 text-neutral-100">
@@ -232,7 +250,7 @@ export default function ManageStudents() {
                       </button>
                       <button
                         onClick={() => confirmDelete(s.id, s.fullName)}
-                        className="px-2 py-1 bg-red-600 text-neutral-100 rounded hover:bg-indigo-900 text-sm"
+                        className="px-2 py-1 bg-red-600 text-white rounded hover:bg-red-700 text-sm"
                       >
                         Delete
                       </button>
@@ -244,35 +262,31 @@ export default function ManageStudents() {
           </table>
         </div>
 
-        {/* Mobile cards */}
+        {/* Mobile */}
         <div className="md:hidden space-y-4">
-          {filtered.length === 0 ? (
-            <p className="text-center">No students found.</p>
-          ) : (
-            filtered.map((s) => (
-              <div
-                key={s.id}
-                className="bg-neutral-100 p-4 rounded-lg shadow space-y-2"
-              >
-                <p className="font-semibold">{s.fullName}</p>
-                <p className="text-sm">{s.email}</p>
-                <div className="flex justify-end space-x-2">
-                  <button
-                    onClick={() => startEdit(s)}
-                    className="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm"
-                  >
-                    Edit
-                  </button>
-                  <button
-                    onClick={() => confirmDelete(s.id, s.fullName)}
-                    className="px-3 py-1 bg-indigo-800 text-neutral-100 rounded hover:bg-indigo-900 text-sm"
-                  >
-                    Delete
-                  </button>
-                </div>
+          {filtered.map((s) => (
+            <div
+              key={s.id}
+              className="bg-neutral-100 p-4 rounded-lg shadow space-y-2"
+            >
+              <p className="font-semibold">{s.fullName}</p>
+              <p className="text-sm">{s.email}</p>
+              <div className="flex justify-end space-x-2">
+                <button
+                  onClick={() => startEdit(s)}
+                  className="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm"
+                >
+                  Edit
+                </button>
+                <button
+                  onClick={() => confirmDelete(s.id, s.fullName)}
+                  className="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700 text-sm"
+                >
+                  Delete
+                </button>
               </div>
-            ))
-          )}
+            </div>
+          ))}
         </div>
       </div>
 
@@ -315,7 +329,7 @@ export default function ManageStudents() {
               </button>
               <button
                 onClick={saveEdit}
-                className="px-4 py-2 bg-indigo-800 text-neutral-100 rounded hover:bg-indigo-900"
+                className="px-4 py-2 bg-indigo-800 text-white rounded hover:bg-indigo-900"
               >
                 Save
               </button>
