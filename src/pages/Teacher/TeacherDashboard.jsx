@@ -179,7 +179,7 @@ export default function TeacherDashboard() {
             <h3 className="text-lg font-medium mb-4">Ideas by Status</h3>
             <Doughnut data={doughnutData} options={chartOptions} />
           </div>
-          <div className="flex  flex-col items-center justify-center lg:gap-10 bg-indigo-800 text-neutral-100 rounded-lg shadow p-6">
+          <div className=" bg-indigo-800 text-neutral-100 rounded-lg shadow p-6">
             <h3 className="text-lg font-medium mb-4">Students per Teacher</h3>
             <Bar data={barData} options={chartOptions} />
           </div>
