@@ -26,9 +26,11 @@ export default function StudentDashboard() {
     if (!user?.id) return;
 
     const fetchData = async () => {
+      let studentIds = [];
+
       try {
-        // 1) Get this student's assignment
-        const assignRes = await secondaryAPI.get(`/assignments`, {
+        // 1) Get this student's assignment (to find their teacher)
+        const assignRes = await secondaryAPI.get("/assignments", {
           params: { studentId: user.id },
         });
         const assignment = assignRes.data[0];
@@ -48,10 +50,9 @@ export default function StudentDashboard() {
             console.error("Error fetching teacher info:", e);
         }
 
-        // 3) Fetch assignments for team members
-        let studentIds = [];
+        // 3) Fetch team assignments (to get all student IDs under the same teacher)
         try {
-          const teamRes = await secondaryAPI.get(`/assignments`, {
+          const teamRes = await secondaryAPI.get("/assignments", {
             params: { teacherId: assignment.teacherId },
           });
           studentIds = teamRes.data.map((a) => a.studentId);
@@ -60,7 +61,7 @@ export default function StudentDashboard() {
             console.error("Error fetching team assignments:", e);
         }
 
-        // 4) Fetch team member details individually to avoid filtering issues
+        // 4) Fetch team member details
         try {
           if (studentIds.length > 0) {
             const userPromises = studentIds.map((id) =>
@@ -74,32 +75,32 @@ export default function StudentDashboard() {
             console.error("Error fetching team members:", e);
         }
 
-        // 5) Fetch approved ideas for the team
+        // 5) Fetch *all* accepted ideas for those team members
         try {
           if (studentIds.length > 0) {
-            const ideasRes = await secondaryAPI.get(`/ideas`, {
+            const ideasRes = await secondaryAPI.get("/ideas", {
               params: { status: "accepted" },
             });
-            const filtered = ideasRes.data.filter((idea) =>
+            const teamIdeas = ideasRes.data.filter((idea) =>
               studentIds.includes(idea.studentId)
             );
-            setApprovedIdeas(filtered);
+            setApprovedIdeas(teamIdeas);
           }
         } catch (e) {
-          if (e.response?.status === 404) return;
-          console.error("Error fetching approved ideas:", e);
+          if (e.response?.status !== 404)
+            console.error("Error fetching team ideas:", e);
         }
       } catch (err) {
-        // Suppress 404 errors globally
-        if (err.response?.status === 404) return;
-        console.error("Error fetching dashboard data:", err);
+        if (err.response?.status !== 404) {
+          console.error("Error fetching dashboard data:", err);
+        }
       }
     };
 
     fetchData();
   }, [user.id]);
 
-  // Prepare chart data: ideas per student
+  // Prepare chart data: count of ideas per team member
   const ideasPerStudent = {};
   teamMembers.forEach((m) => {
     ideasPerStudent[m.fullName] = 0;
@@ -125,6 +126,7 @@ export default function StudentDashboard() {
       <div className="max-w-5xl mx-auto space-y-8">
         <h1 className="text-3xl font-bold">Hello, {user.fullName}</h1>
 
+        {/* Teacher & Team Summary */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div className="bg-white rounded-lg shadow p-4">
             <h2 className="text-lg font-semibold mb-2">Your Teacher</h2>
@@ -166,17 +168,48 @@ export default function StudentDashboard() {
           </div>
 
           <div className="bg-white rounded-lg shadow p-4">
-            <h2 className="text-lg font-semibold mb-2">Approved Ideas</h2>
+            <h2 className="text-lg font-semibold mb-2">Team Ideas</h2>
             <p className="text-2xl font-bold">{approvedIdeas.length}</p>
           </div>
         </div>
 
+        {/* Chart: Ideas by Team Member */}
         <div className="bg-white rounded-lg shadow p-6">
           <h2 className="text-xl font-semibold mb-4">Ideas by Student</h2>
-          {approvedIdeas.length > 0 ? (
+          {Object.values(ideasPerStudent).some((count) => count > 0) ? (
             <Bar data={barData} options={{ responsive: true }} />
           ) : (
-            <p className="text-center">No approved ideas yet.</p>
+            <p className="text-center text-gray-500">No approved ideas yet.</p>
+          )}
+        </div>
+
+        {/* Detailed List of All Team Ideas */}
+        <div className="bg-white rounded-lg shadow p-6">
+          <h2 className="text-xl font-semibold mb-4">Team's Idea Details</h2>
+          {approvedIdeas.length > 0 ? (
+            <div className="space-y-4">
+              {approvedIdeas.map((idea) => (
+                <div key={idea.id} className="p-4 bg-gray-50 rounded">
+                  <h3 className="text-lg font-medium">{idea.title}</h3>
+                  <p className="text-sm text-gray-700 mb-2">
+                    {idea.description}
+                  </p>
+                  <p className="text-sm">
+                    <strong>Status:</strong> {idea.status}
+                  </p>
+                  {idea.reason && (
+                    <p className="text-sm">
+                      <strong>Reason:</strong> {idea.reason}
+                    </p>
+                  )}
+                  <p className="text-sm italic text-gray-500">
+                    Submitted by: {idea.studentName}
+                  </p>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-center text-gray-500">No ideas to display.</p>
           )}
         </div>
       </div>
