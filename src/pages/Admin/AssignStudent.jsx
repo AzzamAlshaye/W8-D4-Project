@@ -67,8 +67,8 @@ export default function AssignStudent() {
   };
 
   return (
-    <div className="min-h-screen bg-neutral-100 text-indigo-800 p-6">
-      <div className="max-w-lg mx-auto space-y-6">
+    <div className="min-h-screen bg-neutral-100 text-indigo-800">
+      <div className="max-w-lg mx-auto space-y-6 pt-10">
         <h1 className="text-2xl font-bold">Assign Student to Teacher</h1>
 
         {user.userType === "admin" ? (
