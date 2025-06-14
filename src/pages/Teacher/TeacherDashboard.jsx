@@ -173,7 +173,6 @@ export default function TeacherDashboard() {
             </p>
           </div>
         </div>
-
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           <div className="bg-indigo-800 text-neutral-100 rounded-lg shadow p-6">
             <h3 className="text-lg font-medium mb-4">Ideas by Status</h3>
