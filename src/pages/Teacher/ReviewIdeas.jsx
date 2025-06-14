@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { useAuth } from "../../contexts/AuthContext";
 import { secondaryAPI } from "../../api/axiosConfig";
+import { useTitle } from "../../hooks/useTitle";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 export default function ReviewIdeas() {
   const { user } = useAuth();
+  useTitle("Teacher | Review Ideas");
   const [ideas, setIdeas] = useState([]);
   const [editingIdea, setEditingIdea] = useState(null);
 

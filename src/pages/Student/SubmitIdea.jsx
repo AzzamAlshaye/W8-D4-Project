@@ -2,11 +2,13 @@
 import React, { useEffect, useState } from "react";
 import { useAuth } from "../../contexts/AuthContext";
 import { secondaryAPI } from "../../api/axiosConfig";
+import { useTitle } from "../../hooks/useTitle";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 export default function SubmitIdea() {
   const { user } = useAuth(); // user has { id, fullName, ... }
+  useTitle("Student | Submit Ideas");
   const [myIdeas, setMyIdeas] = useState([]);
   const [newIdea, setNewIdea] = useState({ title: "", description: "" });
 

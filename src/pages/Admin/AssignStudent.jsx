@@ -2,10 +2,12 @@
 import React, { useEffect, useState } from "react";
 import { useAuth } from "../../contexts/AuthContext";
 import { primaryAPI, secondaryAPI } from "../../api/axiosConfig";
+import { useTitle } from "../../hooks/useTitle";
 import { toast } from "react-toastify";
 
 export default function AssignStudent() {
   const { user } = useAuth();
+  useTitle("Admin | Assign Students");
   const [students, setStudents] = useState([]);
   const [teachers, setTeachers] = useState([]);
   const [assignments, setAssignments] = useState([]);

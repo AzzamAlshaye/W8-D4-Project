@@ -3,12 +3,13 @@ import React from "react";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import { useNavigate, Link } from "react-router";
 import { primaryAPI } from "../api/axiosConfig";
+import { useTitle } from "../hooks/useTitle";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 export default function RegisterPage() {
   const navigate = useNavigate();
-
+  useTitle("Register | Tuwaiq");
   const initialValues = {
     fullName: "",
     email: "",

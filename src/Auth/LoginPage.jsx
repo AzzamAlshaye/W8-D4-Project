@@ -4,12 +4,13 @@ import { Formik, Form, Field, ErrorMessage } from "formik";
 import { Link } from "react-router";
 import { useAuth } from "../contexts/AuthContext";
 import { ToastContainer } from "react-toastify";
+import { useTitle } from "../hooks/useTitle";
 import "react-toastify/dist/ReactToastify.css";
 
 export default function LoginPage() {
   const { login } = useAuth();
   const initialValues = { email: "", password: "" };
-
+  useTitle("Login | Tuwaiq");
   const validate = (values) => {
     const errors = {};
     if (!values.email) {

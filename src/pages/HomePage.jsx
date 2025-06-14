@@ -2,13 +2,14 @@
 import React from "react";
 import { Link } from "react-router";
 import { useAuth } from "../contexts/AuthContext";
+import { useTitle } from "../hooks/useTitle";
 
 export default function HomeScreen() {
   const isAuth = localStorage.getItem("isAuthenticated") === "true";
   // get the user object (we only ever store id, fullName, email, userType)
   const raw = localStorage.getItem("user");
   const user = raw ? JSON.parse(raw) : null;
-
+  useTitle("Home | Tuwaiq");
   // decide where “dashboard” should go
   let dashboardPath = "/";
   if (user?.userType === "admin") dashboardPath = "/admin";

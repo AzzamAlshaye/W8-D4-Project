@@ -3,10 +3,12 @@ import React, { useEffect, useState } from "react";
 import { useAuth } from "../../contexts/AuthContext";
 import { secondaryAPI } from "../../api/axiosConfig";
 import { toast, ToastContainer } from "react-toastify";
+import { useTitle } from "../../hooks/useTitle";
 import "react-toastify/dist/ReactToastify.css";
 
 export default function ManageIdeas() {
   const { user } = useAuth();
+  useTitle("Admin | Manage Ideas");
   const [ideas, setIdeas] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [editingIdea, setEditingIdea] = useState(null);

@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from "react";
 import { useAuth } from "../../contexts/AuthContext";
 import { primaryAPI, secondaryAPI } from "../../api/axiosConfig";
+import { useTitle } from "../../hooks/useTitle";
 import {
   Chart as ChartJS,
   ArcElement,
@@ -24,6 +25,7 @@ ChartJS.register(
 
 export default function AdminDashboard() {
   const { user } = useAuth();
+  useTitle("Admin | Dashboard");
   const [stats, setStats] = useState({
     totalStudents: 0,
     totalTeachers: 0,

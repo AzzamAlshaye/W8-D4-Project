@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useAuth } from "../../contexts/AuthContext";
 import { primaryAPI, secondaryAPI } from "../../api/axiosConfig";
+import { useTitle } from "../../hooks/useTitle";
 import {
   Chart as ChartJS,
   BarElement,
@@ -15,6 +16,7 @@ ChartJS.register(BarElement, CategoryScale, LinearScale, Tooltip, Legend);
 
 export default function StudentDashboard() {
   const { user } = useAuth();
+  useTitle("Student | Dashboard");
   const [assignedTeacher, setAssignedTeacher] = useState({
     name: "",
     email: "",

@@ -2,11 +2,13 @@
 import React, { useEffect, useState } from "react";
 import { useAuth } from "../../contexts/AuthContext";
 import { primaryAPI } from "../../api/axiosConfig";
+import { useTitle } from "../../hooks/useTitle";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 export default function ManageTeachers() {
   const { user } = useAuth();
+  useTitle("Admin | Manage Teachers");
   const [teachers, setTeachers] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [newTeacher, setNewTeacher] = useState({
