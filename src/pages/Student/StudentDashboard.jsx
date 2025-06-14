@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from "react";
 import { useAuth } from "../../contexts/AuthContext";
 import { secondaryAPI, primaryAPI } from "../../api/axiosConfig";
+
 export default function StudentDashboard() {
   const { user } = useAuth();
   const [assignedTeacher, setAssignedTeacher] = useState({
@@ -15,15 +16,17 @@ export default function StudentDashboard() {
     if (!user?.id) return;
 
     const fetchData = async () => {
+      let studentIds = [];
       try {
-        // 1) Find this student's assignment
+        // 1) Get this student's assignment
         const assignRes = await secondaryAPI.get(
           `/assignments?studentId=${user.id}`
         );
         const assignment = assignRes.data[0];
+        if (!assignment) return;
 
-        if (assignment) {
-          // 2) Fetch teacher's user record to get their email
+        // 2) Fetch teacher record
+        try {
           const teacherRes = await primaryAPI.get(
             `/auth/${assignment.teacherId}`
           );
@@ -31,38 +34,43 @@ export default function StudentDashboard() {
             name: assignment.teacherName,
             email: teacherRes.data.email,
           });
+        } catch (err) {
+          if (err.response?.status !== 404)
+            console.error("Error fetching teacher record:", err);
+        }
 
-          // 3) Fetch all assignments for that teacher
-          const teamRes = await secondaryAPI.get(
-            `/assignments?teacherId=${assignment.teacherId}`
-          );
-          const studentIds = teamRes.data.map((a) => a.studentId);
+        // 3) Get all students assigned to same teacher
+        const teamRes = await secondaryAPI.get(
+          `/assignments?teacherId=${assignment.teacherId}`
+        );
+        studentIds = teamRes.data.map((a) => a.studentId);
 
-          // 4) Fetch user data for those students to get names & emails
+        // 4) Fetch user info for these students
+        try {
           const usersRes = await primaryAPI.get("/auth");
           const members = usersRes.data
             .filter((u) => studentIds.includes(u.id))
-            .map((u) => ({
-              id: u.id,
-              fullName: u.fullName,
-              email: u.email,
-            }));
-
+            .map((u) => ({ id: u.id, fullName: u.fullName, email: u.email }));
           setTeamMembers(members);
-        } else {
-          setAssignedTeacher({ name: "", email: "" });
-          setTeamMembers([]);
+        } catch (err) {
+          if (err.response?.status !== 404)
+            console.error("Error fetching team members:", err);
+        }
+
+        // 5) Fetch accepted ideas, then filter for team members only
+        try {
+          const ideasRes = await secondaryAPI.get("/ideas?status=accepted");
+          const filtered = ideasRes.data.filter((idea) =>
+            studentIds.includes(idea.studentId)
+          );
+          setApprovedIdeas(filtered);
+        } catch (err) {
+          if (err.response?.status !== 404)
+            console.error("Error fetching approved ideas:", err);
         }
       } catch (err) {
-        console.error("Error fetching team data:", err);
-      }
-
-      try {
-        // Fetch approved ideas
-        const ideasRes = await secondaryAPI.get("/ideas?status=accepted");
-        setApprovedIdeas(ideasRes.data);
-      } catch (err) {
-        console.error("Error fetching approved ideas:", err);
+        if (err.response?.status !== 404)
+          console.error("Error fetching assignment:", err);
       }
     };
 
@@ -114,9 +122,11 @@ export default function StudentDashboard() {
           )}
         </div>
 
-        {/* Approved Ideas */}
+        {/* Approved Ideas (Team Only) */}
         <div>
-          <h2 className="text-xl font-medium mb-2">Approved Project Ideas:</h2>
+          <h2 className="text-xl font-medium mb-2">
+            Approved Project Ideas (Your Team)
+          </h2>
           {approvedIdeas.length === 0 ? (
             <p className="text-indigo-900">No approved ideas yet.</p>
           ) : (

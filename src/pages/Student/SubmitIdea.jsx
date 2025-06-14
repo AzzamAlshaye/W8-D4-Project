@@ -56,7 +56,7 @@ export default function SubmitIdea() {
     <div className="min-h-screen bg-neutral-100 text-indigo-800 p-6">
       <ToastContainer position="top-center" />
 
-      <div className="max-w-4xl mx-auto space-y-6">
+      <div className="max-w-4xl mx-auto space-y-6 mt-10">
         <h1 className="text-2xl font-bold text-indigo-800">
           Submit a New Project Idea
         </h1>

@@ -11,18 +11,18 @@ function Footer() {
   return (
     <footer className="flex flex-col w-full px-5 py-6 text-white bg-indigo-900 gap-y-3 md:px-5 lg:px-25">
       <div className="flex flex-col items-center md:flex-row md:justify-between gap-y-4">
-        <div className="flex flex-col">
+        <div className="flex flex-col  text-center items-center lg:items-start lg:text-start">
           <h1 className="text-2xl font-bold">
             Tuwaiq Student Project Management System
           </h1>
-          <p className="pl-1.5 text-sm md:text-base text-neutral-200 w-3/4 md:w-1/2">
+          <p className="pl-1.5 text-sm lg:text-base text-neutral-200 w-3/4 lg:w-1/2  text-center items-center lg:items-start lg:text-start">
             Welcome to the Tuwaiq Student Project Management System—your central
             hub for organizing and tracking student projects efficiently.
             Designed for both students and educators, our platform streamlines
             project workflows and fosters collaboration.
           </p>
         </div>
-        <div className="flex flex-col gap-y-1.5">
+        <div className="flex flex-col gap-y-1.5  text-center items-center lg:items-start lg:text-start">
           <h1 className="text-lg font-bold">Contact Us</h1>
           <ul className="flex flex-col gap-y-0.5 pl-1.5">
             <li className="text-sm md:text-base text-neutral-100">
