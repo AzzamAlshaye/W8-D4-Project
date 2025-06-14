@@ -1,7 +1,17 @@
-// src/pages/Student/StudentDashboard.jsx
 import React, { useEffect, useState } from "react";
 import { useAuth } from "../../contexts/AuthContext";
-import { secondaryAPI, primaryAPI } from "../../api/axiosConfig";
+import { primaryAPI, secondaryAPI } from "../../api/axiosConfig";
+import {
+  Chart as ChartJS,
+  BarElement,
+  CategoryScale,
+  LinearScale,
+  Tooltip,
+  Legend,
+} from "chart.js";
+import { Bar } from "react-chartjs-2";
+
+ChartJS.register(BarElement, CategoryScale, LinearScale, Tooltip, Legend);
 
 export default function StudentDashboard() {
   const { user } = useAuth();
@@ -16,16 +26,15 @@ export default function StudentDashboard() {
     if (!user?.id) return;
 
     const fetchData = async () => {
-      let studentIds = [];
       try {
         // 1) Get this student's assignment
-        const assignRes = await secondaryAPI.get(
-          `/assignments?studentId=${user.id}`
-        );
+        const assignRes = await secondaryAPI.get(`/assignments`, {
+          params: { studentId: user.id },
+        });
         const assignment = assignRes.data[0];
         if (!assignment) return;
 
-        // 2) Fetch teacher record
+        // 2) Fetch teacher info
         try {
           const teacherRes = await primaryAPI.get(
             `/auth/${assignment.teacherId}`
@@ -34,109 +43,140 @@ export default function StudentDashboard() {
             name: assignment.teacherName,
             email: teacherRes.data.email,
           });
-        } catch (err) {
-          if (err.response?.status !== 404)
-            console.error("Error fetching teacher record:", err);
+        } catch (e) {
+          if (e.response?.status !== 404)
+            console.error("Error fetching teacher info:", e);
         }
 
-        // 3) Get all students assigned to same teacher
-        const teamRes = await secondaryAPI.get(
-          `/assignments?teacherId=${assignment.teacherId}`
-        );
-        studentIds = teamRes.data.map((a) => a.studentId);
-
-        // 4) Fetch user info for these students
+        // 3) Fetch assignments for team members
+        let studentIds = [];
         try {
-          const usersRes = await primaryAPI.get("/auth");
-          const members = usersRes.data
-            .filter((u) => studentIds.includes(u.id))
-            .map((u) => ({ id: u.id, fullName: u.fullName, email: u.email }));
-          setTeamMembers(members);
-        } catch (err) {
-          if (err.response?.status !== 404)
-            console.error("Error fetching team members:", err);
+          const teamRes = await secondaryAPI.get(`/assignments`, {
+            params: { teacherId: assignment.teacherId },
+          });
+          studentIds = teamRes.data.map((a) => a.studentId);
+        } catch (e) {
+          if (e.response?.status !== 404)
+            console.error("Error fetching team assignments:", e);
         }
 
-        // 5) Fetch accepted ideas, then filter for team members only
+        // 4) Fetch team member details individually to avoid filtering issues
         try {
-          const ideasRes = await secondaryAPI.get("/ideas?status=accepted");
-          const filtered = ideasRes.data.filter((idea) =>
-            studentIds.includes(idea.studentId)
-          );
-          setApprovedIdeas(filtered);
-        } catch (err) {
-          if (err.response?.status !== 404)
-            console.error("Error fetching approved ideas:", err);
+          if (studentIds.length > 0) {
+            const userPromises = studentIds.map((id) =>
+              primaryAPI.get(`/auth/${id}`)
+            );
+            const results = await Promise.all(userPromises);
+            setTeamMembers(results.map((r) => r.data));
+          }
+        } catch (e) {
+          if (e.response?.status !== 404)
+            console.error("Error fetching team members:", e);
+        }
+
+        // 5) Fetch approved ideas for the team
+        try {
+          if (studentIds.length > 0) {
+            const ideasRes = await secondaryAPI.get(`/ideas`, {
+              params: { status: "accepted" },
+            });
+            const filtered = ideasRes.data.filter((idea) =>
+              studentIds.includes(idea.studentId)
+            );
+            setApprovedIdeas(filtered);
+          }
+        } catch (e) {
+          if (e.response?.status === 404) return;
+          console.error("Error fetching approved ideas:", e);
         }
       } catch (err) {
-        if (err.response?.status !== 404)
-          console.error("Error fetching assignment:", err);
+        // Suppress 404 errors globally
+        if (err.response?.status === 404) return;
+        console.error("Error fetching dashboard data:", err);
       }
     };
 
     fetchData();
   }, [user.id]);
 
+  // Prepare chart data: ideas per student
+  const ideasPerStudent = {};
+  teamMembers.forEach((m) => {
+    ideasPerStudent[m.fullName] = 0;
+  });
+  approvedIdeas.forEach((idea) => {
+    const author = teamMembers.find((m) => m.id === idea.studentId);
+    if (author) ideasPerStudent[author.fullName]++;
+  });
+
+  const barData = {
+    labels: Object.keys(ideasPerStudent),
+    datasets: [
+      {
+        label: "# Approved Ideas",
+        data: Object.values(ideasPerStudent),
+        backgroundColor: "#3b82f6",
+      },
+    ],
+  };
+
   return (
-    <div className="min-h-screen bg-neutral-100 text-indigo-800 p-6">
-      <div className="max-w-4xl mx-auto space-y-6">
-        <h1 className="text-2xl font-bold">Welcome, {user.fullName}</h1>
+    <div className="min-h-screen bg-neutral-50 p-6 text-gray-800">
+      <div className="max-w-5xl mx-auto space-y-8">
+        <h1 className="text-3xl font-bold">Hello, {user.fullName}</h1>
 
-        {/* Assigned Teacher */}
-        <div>
-          <h2 className="text-xl font-medium mb-2">Assigned Teacher:</h2>
-          {assignedTeacher.name ? (
-            <p className="text-indigo-900">
-              <strong>{assignedTeacher.name}</strong> –{" "}
-              <a
-                href={`mailto:${assignedTeacher.email}`}
-                className="text-indigo-600 hover:underline"
-              >
-                {assignedTeacher.email}
-              </a>
-            </p>
-          ) : (
-            <p className="text-indigo-900">Not assigned yet.</p>
-          )}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="bg-white rounded-lg shadow p-4">
+            <h2 className="text-lg font-semibold mb-2">Your Teacher</h2>
+            {assignedTeacher.name ? (
+              <div>
+                <p className="font-medium">{assignedTeacher.name}</p>
+                <a
+                  href={`mailto:${assignedTeacher.email}`}
+                  className="text-blue-600 hover:underline"
+                >
+                  {assignedTeacher.email}
+                </a>
+              </div>
+            ) : (
+              <p>Not assigned yet.</p>
+            )}
+          </div>
+
+          <div className="bg-white rounded-lg shadow p-4">
+            <h2 className="text-lg font-semibold mb-2">Team Members</h2>
+            <p className="text-2xl font-bold mb-2">{teamMembers.length}</p>
+            {teamMembers.length > 0 ? (
+              <ul className="list-disc list-inside space-y-1 text-sm">
+                {teamMembers.map((m) => (
+                  <li key={m.id} className="flex flex-col">
+                    <span className="font-medium">{m.fullName}</span>
+                    <a
+                      href={`mailto:${m.email}`}
+                      className="text-blue-600 hover:underline"
+                    >
+                      {m.email}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p>No teammates found.</p>
+            )}
+          </div>
+
+          <div className="bg-white rounded-lg shadow p-4">
+            <h2 className="text-lg font-semibold mb-2">Approved Ideas</h2>
+            <p className="text-2xl font-bold">{approvedIdeas.length}</p>
+          </div>
         </div>
 
-        {/* Team Members */}
-        <div>
-          <h2 className="text-xl font-medium mb-2">Team Members:</h2>
-          {teamMembers.length === 0 ? (
-            <p className="text-indigo-900">No teammates found.</p>
+        <div className="bg-white rounded-lg shadow p-6">
+          <h2 className="text-xl font-semibold mb-4">Ideas by Student</h2>
+          {approvedIdeas.length > 0 ? (
+            <Bar data={barData} options={{ responsive: true }} />
           ) : (
-            <ul className="list-disc list-inside space-y-2">
-              {teamMembers.map((m) => (
-                <li key={m.id} className="text-indigo-800">
-                  {m.fullName} –{" "}
-                  <a
-                    href={`mailto:${m.email}`}
-                    className="text-indigo-600 hover:underline"
-                  >
-                    {m.email}
-                  </a>
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
-
-        {/* Approved Ideas (Team Only) */}
-        <div>
-          <h2 className="text-xl font-medium mb-2">
-            Approved Project Ideas (Your Team)
-          </h2>
-          {approvedIdeas.length === 0 ? (
-            <p className="text-indigo-900">No approved ideas yet.</p>
-          ) : (
-            <ul className="list-disc list-inside space-y-2">
-              {approvedIdeas.map((idea) => (
-                <li key={idea.id} className="text-indigo-800">
-                  {idea.title} (by {idea.studentName})
-                </li>
-              ))}
-            </ul>
+            <p className="text-center">No approved ideas yet.</p>
           )}
         </div>
       </div>
