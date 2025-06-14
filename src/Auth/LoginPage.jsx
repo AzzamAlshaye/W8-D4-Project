@@ -14,6 +14,8 @@ export default function LoginPage() {
     const errors = {};
     if (!values.email) {
       errors.email = "Required";
+    } else if (!/^[A-Z0-9._%+-]+@tuwaiq\.edu\.sa$/i.test(values.email)) {
+      errors.email = 'Email must end with "@tuwaiq.edu.sa".';
     }
     if (!values.password) {
       errors.password = "Required";
@@ -106,10 +108,10 @@ export default function LoginPage() {
                 {isSubmitting ? "Logging In..." : "Log In"}
               </button>
 
-              {/* Home button with darker background */}
+              {/* Home button (darker) */}
               <Link
                 to="/"
-                className="w-full block text-center  py-2 bg-neutral-200 text-indigo-800 font-semibold rounded-lg hover:bg-neutral-300 transition"
+                className="w-full block text-center mt-4 py-2 bg-neutral-200 text-indigo-800 font-semibold rounded-lg hover:bg-neutral-300 transition"
               >
                 Home
               </Link>
