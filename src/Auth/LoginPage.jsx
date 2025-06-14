@@ -1,6 +1,7 @@
 // src/pages/Auth/LoginPage.jsx
 import React from "react";
 import { Formik, Form, Field, ErrorMessage } from "formik";
+import { Link } from "react-router";
 import { useAuth } from "../contexts/AuthContext";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -26,12 +27,27 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-neutral-100 p-6">
+    <div
+      className="
+        min-h-screen flex items-center justify-center
+        bg-[url('/background.svg')] bg-cover bg-center
+        p-6
+      "
+    >
       <ToastContainer position="top-center" />
+
       <div className="bg-indigo-800 shadow-lg rounded-3xl max-w-md w-full p-8">
+        {/* Logo */}
+        <div className="p-0.5 bg-neutral-100 rounded hover:bg-gray-100 flex items-center justify-center mb-6">
+          <img src="/logo-h.png" alt="Logo" className="w-35 object-cover" />
+        </div>
+
+        {/* Heading */}
         <h2 className="text-3xl font-bold text-neutral-100 mb-6 text-center">
           Log In
         </h2>
+
+        {/* Form */}
         <Formik
           initialValues={initialValues}
           validate={validate}
@@ -81,6 +97,7 @@ export default function LoginPage() {
                 />
               </div>
 
+              {/* Log In button */}
               <button
                 type="submit"
                 disabled={isSubmitting}
@@ -89,14 +106,22 @@ export default function LoginPage() {
                 {isSubmitting ? "Logging In..." : "Log In"}
               </button>
 
-              <p className="text-neutral-100 text-center">
+              {/* Home button with darker background */}
+              <Link
+                to="/"
+                className="w-full block text-center  py-2 bg-neutral-200 text-indigo-800 font-semibold rounded-lg hover:bg-neutral-300 transition"
+              >
+                Home
+              </Link>
+
+              <p className="text-neutral-100 text-center mt-4">
                 Don’t have an account?{" "}
-                <a
-                  href="/register"
+                <Link
+                  to="/register"
                   className="text-indigo-300 hover:underline font-medium"
                 >
                   Register
-                </a>
+                </Link>
               </p>
             </Form>
           )}

@@ -1,7 +1,7 @@
 // src/pages/Auth/RegisterPage.jsx
 import React from "react";
 import { Formik, Form, Field, ErrorMessage } from "formik";
-import { useNavigate } from "react-router";
+import { useNavigate, Link } from "react-router";
 import { primaryAPI } from "../api/axiosConfig";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -58,7 +58,6 @@ export default function RegisterPage() {
     };
 
     try {
-      // Using primaryAPI for mock registration
       await primaryAPI.post("/auth", payload);
       toast.success("Sign-up successful! Redirecting to login…");
       resetForm();
@@ -72,7 +71,13 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-neutral-100 p-6">
+    <div
+      className="
+        min-h-screen flex items-center justify-center
+        bg-[url('/background.svg')] bg-cover bg-center
+        p-6
+      "
+    >
       <ToastContainer position="top-center" />
       <div className="bg-indigo-800 shadow-lg rounded-3xl max-w-md w-full p-8">
         <div className="flex flex-col items-center mb-6">
@@ -179,6 +184,13 @@ export default function RegisterPage() {
               >
                 {isSubmitting ? "Registering..." : "Register"}
               </button>
+
+              <Link
+                to="/"
+                className="w-full block text-center  py-2 bg-neutral-200 text-indigo-800 font-semibold rounded-lg hover:bg-neutral-300 transition"
+              >
+                Home
+              </Link>
 
               <p className="mt-6 text-center text-neutral-100">
                 Already have an account?{" "}
