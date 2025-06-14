@@ -232,7 +232,7 @@ export default function ManageStudents() {
                       </button>
                       <button
                         onClick={() => confirmDelete(s.id, s.fullName)}
-                        className="px-2 py-1 bg-indigo-800 text-neutral-100 rounded hover:bg-indigo-900 text-sm"
+                        className="px-2 py-1 bg-red-600 text-neutral-100 rounded hover:bg-indigo-900 text-sm"
                       >
                         Delete
                       </button>

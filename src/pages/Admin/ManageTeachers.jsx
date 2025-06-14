@@ -15,10 +15,7 @@ export default function ManageTeachers() {
     password: "",
   });
   const [adding, setAdding] = useState(false);
-
-  // Edit state
   const [editingTeacher, setEditingTeacher] = useState(null);
-  // { id, fullName, email, password }
 
   useEffect(() => {
     fetchTeachers();
@@ -27,8 +24,7 @@ export default function ManageTeachers() {
   async function fetchTeachers() {
     try {
       const res = await primaryAPI.get("/auth");
-      const allUsers = res.data;
-      const teachersOnly = allUsers.filter((u) => u.userType === "teacher");
+      const teachersOnly = res.data.filter((u) => u.userType === "teacher");
       setTeachers(teachersOnly);
     } catch (err) {
       console.error(err);
@@ -36,9 +32,42 @@ export default function ManageTeachers() {
     }
   }
 
-  async function handleDelete(id) {
-    if (!window.confirm("Are you sure you want to delete this teacher?"))
-      return;
+  // show a toast with confirm/cancel buttons
+  const showDeleteConfirm = (id) => {
+    toast.info(
+      ({ closeToast }) => (
+        <div className="space-y-2">
+          <p>Are you sure you want to delete this teacher?</p>
+          <div className="flex justify-end space-x-2">
+            <button
+              onClick={() => {
+                confirmDelete(id, closeToast);
+              }}
+              className="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700 text-sm"
+            >
+              Yes
+            </button>
+            <button
+              onClick={() => closeToast()}
+              className="px-3 py-1 bg-gray-300 text-gray-800 rounded hover:bg-gray-400 text-sm"
+            >
+              No
+            </button>
+          </div>
+        </div>
+      ),
+      {
+        position: "top-center",
+        autoClose: false,
+        closeOnClick: false,
+        closeButton: false,
+        draggable: false,
+      }
+    );
+  };
+
+  // actually delete once confirmed
+  async function confirmDelete(id, closeToast) {
     try {
       await primaryAPI.delete(`/auth/${id}`);
       toast.success("Teacher deleted");
@@ -46,6 +75,8 @@ export default function ManageTeachers() {
     } catch (err) {
       console.error(err);
       toast.error("Failed to delete teacher");
+    } finally {
+      closeToast();
     }
   }
 
@@ -113,7 +144,6 @@ export default function ManageTeachers() {
   return (
     <div className="min-h-screen bg-neutral-100 text-indigo-800 p-4 sm:p-6 lg:p-8">
       <ToastContainer position="top-center" />
-
       <div className="max-w-5xl mx-auto space-y-8 mt-10">
         <h1 className="text-2xl sm:text-3xl font-bold">Manage Teachers</h1>
 
@@ -200,8 +230,8 @@ export default function ManageTeachers() {
                         Edit
                       </button>
                       <button
-                        onClick={() => handleDelete(t.id)}
-                        className="px-2 py-1 bg-indigo-800 text-neutral-100 rounded hover:bg-indigo-900 text-sm"
+                        onClick={() => showDeleteConfirm(t.id)}
+                        className="px-2 py-1 bg-red-600 text-white rounded hover:bg-red-700 text-sm"
                       >
                         Delete
                       </button>
@@ -233,8 +263,8 @@ export default function ManageTeachers() {
                     Edit
                   </button>
                   <button
-                    onClick={() => handleDelete(t.id)}
-                    className="px-3 py-1 bg-indigo-800 text-neutral-100 rounded hover:bg-indigo-900 text-sm"
+                    onClick={() => showDeleteConfirm(t.id)}
+                    className="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700 text-sm"
                   >
                     Delete
                   </button>
