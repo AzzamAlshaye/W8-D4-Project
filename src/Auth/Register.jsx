@@ -8,6 +8,7 @@ import "react-toastify/dist/ReactToastify.css";
 
 export default function RegisterPage() {
   const navigate = useNavigate();
+
   const initialValues = {
     fullName: "",
     email: "",
@@ -18,28 +19,37 @@ export default function RegisterPage() {
   const validate = (values) => {
     const errors = {};
 
-    if (!values.fullName) {
+    // Full Name: count only non-space characters
+    const nameLetters = values.fullName.replace(/\s/g, "");
+    if (!nameLetters) {
       errors.fullName = "Required";
-    } else if (values.fullName.length < 3) {
-      errors.fullName = "Must be at least 3 characters";
-    } else if (values.fullName.length > 50) {
-      errors.fullName = "Can't exceed 50 characters";
+    } else if (nameLetters.length < 3) {
+      errors.fullName = "Must be at least 3 letters";
+    } else if (nameLetters.length > 50) {
+      errors.fullName = "Can't exceed 50 letters";
     }
 
+    // Email
     if (!values.email) {
       errors.email = "Required";
+    } else if (/\s/.test(values.email)) {
+      errors.email = "Email cannot contain spaces";
     } else if (!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(values.email)) {
       errors.email = "Invalid email address";
     } else if (!values.email.endsWith("@tuwaiq.edu.sa")) {
       errors.email = 'Email must end with "@tuwaiq.edu.sa".';
     }
 
+    // Password
     if (!values.password) {
       errors.password = "Required";
+    } else if (/\s/.test(values.password)) {
+      errors.password = "Password cannot contain spaces";
     } else if (values.password.length < 8) {
       errors.password = "Must be at least 8 characters";
     }
 
+    // Confirm Password
     if (!values.confirmPassword) {
       errors.confirmPassword = "Required";
     } else if (values.confirmPassword !== values.password) {
@@ -50,14 +60,28 @@ export default function RegisterPage() {
   };
 
   const onSubmit = async (values, { setSubmitting, resetForm }) => {
+    const emailTrimmed = values.email.trim();
     const payload = {
-      fullName: values.fullName,
-      email: values.email,
+      fullName: values.fullName.trim(),
+      email: emailTrimmed,
       password: values.password,
-      userType: "student", // always register as student
+      userType: "student",
     };
 
     try {
+      // Fetch all users, then check for duplicates client-side
+      const { data: allUsers } = await primaryAPI.get("/auth");
+      const exists = allUsers.some(
+        (u) => u.email.toLowerCase() === emailTrimmed.toLowerCase()
+      );
+
+      if (exists) {
+        toast.error("This email is already registered");
+        setSubmitting(false);
+        return;
+      }
+
+      // Register new student
       await primaryAPI.post("/auth", payload);
       toast.success("Sign-up successful! Redirecting to login…");
       resetForm();
@@ -79,12 +103,11 @@ export default function RegisterPage() {
       "
     >
       <ToastContainer position="top-center" />
+
       <div className="bg-indigo-800 shadow-lg rounded-3xl max-w-md w-full p-8">
-        <div className="flex flex-col items-center mb-6">
-          <h2 className="text-2xl font-bold text-neutral-100">
-            Create Student Account
-          </h2>
-        </div>
+        <h2 className="text-2xl font-bold text-neutral-100 text-center mb-6">
+          Create Student Account
+        </h2>
 
         <Formik
           initialValues={initialValues}
@@ -93,6 +116,7 @@ export default function RegisterPage() {
         >
           {({ isSubmitting }) => (
             <Form className="space-y-5">
+              {/* Full Name */}
               <div>
                 <label
                   htmlFor="fullName"
@@ -104,8 +128,8 @@ export default function RegisterPage() {
                   type="text"
                   id="fullName"
                   name="fullName"
-                  className="w-full px-4 py-2 bg-neutral-100 text-indigo-800 border border-indigo-800 rounded-lg placeholder-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-800"
                   placeholder="Your Name"
+                  className="w-full px-4 py-2 bg-neutral-100 text-indigo-800 border border-indigo-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-800"
                 />
                 <ErrorMessage
                   name="fullName"
@@ -114,6 +138,7 @@ export default function RegisterPage() {
                 />
               </div>
 
+              {/* Email */}
               <div>
                 <label
                   htmlFor="email"
@@ -125,8 +150,8 @@ export default function RegisterPage() {
                   type="email"
                   id="email"
                   name="email"
-                  className="w-full px-4 py-2 bg-neutral-100 text-indigo-800 border border-indigo-800 rounded-lg placeholder-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-800"
                   placeholder="you@tuwaiq.edu.sa"
+                  className="w-full px-4 py-2 bg-neutral-100 text-indigo-800 border border-indigo-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-800"
                 />
                 <ErrorMessage
                   name="email"
@@ -135,6 +160,7 @@ export default function RegisterPage() {
                 />
               </div>
 
+              {/* Password */}
               <div>
                 <label
                   htmlFor="password"
@@ -146,8 +172,8 @@ export default function RegisterPage() {
                   type="password"
                   id="password"
                   name="password"
-                  className="w-full px-4 py-2 bg-neutral-100 text-indigo-800 border border-indigo-800 rounded-lg placeholder-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-800"
                   placeholder="********"
+                  className="w-full px-4 py-2 bg-neutral-100 text-indigo-800 border border-indigo-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-800"
                 />
                 <ErrorMessage
                   name="password"
@@ -156,6 +182,7 @@ export default function RegisterPage() {
                 />
               </div>
 
+              {/* Confirm Password */}
               <div>
                 <label
                   htmlFor="confirmPassword"
@@ -167,8 +194,8 @@ export default function RegisterPage() {
                   type="password"
                   id="confirmPassword"
                   name="confirmPassword"
-                  className="w-full px-4 py-2 bg-neutral-100 text-indigo-800 border border-indigo-800 rounded-lg placeholder-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-800"
                   placeholder="Re-enter Password"
+                  className="w-full px-4 py-2 bg-neutral-100 text-indigo-800 border border-indigo-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-800"
                 />
                 <ErrorMessage
                   name="confirmPassword"
@@ -177,6 +204,7 @@ export default function RegisterPage() {
                 />
               </div>
 
+              {/* Actions */}
               <button
                 type="submit"
                 disabled={isSubmitting}
@@ -187,19 +215,19 @@ export default function RegisterPage() {
 
               <Link
                 to="/"
-                className="w-full block text-center  py-2 bg-neutral-200 text-indigo-800 font-semibold rounded-lg hover:bg-neutral-300 transition"
+                className="w-full block text-center py-2 bg-neutral-200 text-indigo-800 font-semibold rounded-lg hover:bg-neutral-300 transition"
               >
                 Home
               </Link>
 
               <p className="mt-6 text-center text-neutral-100">
                 Already have an account?{" "}
-                <a
-                  href="/login"
+                <Link
+                  to="/login"
                   className="text-indigo-300 font-medium hover:underline"
                 >
                   Log In
-                </a>
+                </Link>
               </p>
             </Form>
           )}
